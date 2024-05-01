@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:online_reservation/Presentation/Modules/Employee/employee.view.dart';
+import 'package:online_reservation/Presentation/Modules/Employee/employee.viewmodel.dart';
 import 'package:online_reservation/Presentation/Modules/Screens/first.screen.dart';
 import 'package:online_reservation/Presentation/Modules/Screens/second.screen.dart';
-import 'package:online_reservation/route/route.generator.dart';
+import 'package:online_reservation/Presentation/route/route.generator.dart';
+import 'package:provider/provider.dart';
 
 void main() {
   runApp(const MyApp());
@@ -13,19 +16,18 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
+    return ChangeNotifierProvider(
+      create: (context) => EmployeeViewModel(),
+      child: MaterialApp(
+        title: 'Flutter Demo',
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+          useMaterial3: true,
+        ),
+        home: const MyHomePage(title: 'Flutter Demo Home Page'),
+        initialRoute: '/',
+        onGenerateRoute: RouteGenerator.generateRoute,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
-      routes: {
-        '/first': (_) => const FirstScreen(),
-        '/second': (_) => const SecondScreen()
-      },
-      initialRoute: '/',
-      onGenerateRoute: RouteGenerator.generateRoute,
     );
   }
 }
@@ -67,6 +69,16 @@ class _MyHomePageState extends State<MyHomePage> {
             ElevatedButton(
                 onPressed: () {
                   Navigator.of(context).pushNamed('/second');
+                },
+                child: const Text("Change Screen")),
+            ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).pushNamed('/employee');
+                },
+                child: const Text("Change Screen")),
+            ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).pushNamed('/login');
                 },
                 child: const Text("Change Screen")),
           ],

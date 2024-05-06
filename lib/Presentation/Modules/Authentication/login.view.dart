@@ -1,175 +1,83 @@
 import 'package:flutter/material.dart';
-import 'package:online_reservation/Presentation/Modules/Widgets/textFieldForm.widget.dart';
-import 'package:online_reservation/config/app.color.dart';
-import 'package:online_reservation/config/app.text.dart';
+import 'package:online_reservation/Presentation/Modules/Authentication/auth.viewmodel.dart';
+import 'package:online_reservation/Presentation/Modules/Widgets/customCard.widget.dart';
+import 'package:online_reservation/Presentation/route/route.generator.dart';
+import 'package:provider/provider.dart';
 
-class LoginScreen extends StatefulWidget {
+class LoginScreen extends StatelessWidget {
   static const String screen_id = "/login";
   const LoginScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
-}
-
-class _LoginScreenState extends State<LoginScreen> {
-  TextEditingController? _textEditingController1, _textEditingController2;
-  late String _email, _password;
-  late bool _pwVisible, _isLoading;
-
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    _textEditingController1 = TextEditingController();
-    _textEditingController2 = TextEditingController();
-    _pwVisible = true;
-    _isLoading = false;
-  }
-
-  @override
-  void dispose() {
-    // TODO: implement dispose
-    _textEditingController1?.dispose();
-    _textEditingController2?.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final currentWidth = MediaQuery.of(context).size.width;
-    final currentHeight = MediaQuery.of(context).size.height;
+    final emailController = TextEditingController();
+    final passwordController = TextEditingController();
+    final viewModel =
+        Provider.of<AuthenticationViewModel>(context, listen: false);
+
     return Scaffold(
-      body: SafeArea(
-          child: Container(
-        width: currentWidth,
-        height: currentHeight,
-        child: Padding(
-          padding: const EdgeInsetsDirectional.fromSTEB(30, 30, 30, 30),
-          child: Card(
-              clipBehavior: Clip.antiAliasWithSaveLayer,
-              color: kPurpleLight,
-              elevation: 3,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Padding(
-                padding: const EdgeInsetsDirectional.fromSTEB(8, 8, 8, 8),
-                child: SingleChildScrollView(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.max,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      const Padding(
-                        padding: EdgeInsetsDirectional.fromSTEB(0, 20, 0, 20),
-                        child: Text(
-                          "Welcome",
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: kPurpleDark),
-                        ),
-                      ),
-                      Form(
-                        child: Column(
-                          children: [
-                            Padding(
-                              padding: const EdgeInsetsDirectional.fromSTEB(
-                                  10, 40, 10, 10),
-                              child: CustomTextFormField(
-                                textEditingController: _textEditingController1,
-                                labelText: 'Email Address',
-                                hintText: "example@southville.edu.ph",
-                                suffixIcon:
-                                    _textEditingController1!.text.isNotEmpty
-                                        ? InkWell(
-                                            onTap: () async {
-                                              _textEditingController1?.clear();
-                                              // setState(() {});
-                                            },
-                                            child: const Icon(
-                                              Icons.clear,
-                                              color: kPurpleLight,
-                                              size: 22,
-                                            ),
-                                          )
-                                        : null,
-                                onChanged: (value) =>
-                                    {setState(() => _email = value)},
-                                validator: (val) {
-                                  if (val == null || val.isEmpty) {
-                                    return 'Field is required';
-                                  }
-                                  if (!RegExp(
-                                          r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
-                                      .hasMatch(val)) {
-                                    return 'Has to be a valid email address.';
-                                  }
-                                  return null;
-                                },
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsetsDirectional.fromSTEB(
-                                  10, 10, 10, 10),
-                              child: CustomTextFormField(
-                                textEditingController: _textEditingController2,
-                                obscureText: _pwVisible,
-                                labelText: 'Password',
-                                hintText: "**********",
-                                suffixIcon:InkWell(
-                                  onTap: () {
-                                    setState(() {
-                                      _pwVisible = !_pwVisible;
-                                    });
-                                  },
-                                  child: Icon(
-                                    _pwVisible
-                                        ? Icons.visibility_off_outlined
-                                        : Icons.visibility_outlined,
-                                    color: kPurpleLight,
-                                    size: 22,
-                                  ),
-                                ),
-                                onChanged: (value) =>
-                                    setState(() => _password = value),
-                                validator: (val) {
-                                  if (val == null || val.isEmpty) {
-                                    return 'Field is required';
-                                  }
-                                  return null;
-                                },
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsetsDirectional.fromSTEB(
-                            10, 40, 10, 10),
-                        child: _isLoading
-                            ? CircularProgressIndicator()
-                            : TextButton(
-                                onPressed: () {},
-                                style: TextButton.styleFrom(
-                                    backgroundColor: kBackgroundGrey,
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 16)),
-                                child: const Text(
-                                  "Log In",
-                                  style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                              ),
-                      ),
-                    ],
+      appBar: AppBar(
+        title: const Text("Login"),
+      ),
+      body: Padding(
+        padding: const EdgeInsetsDirectional.fromSTEB(30, 30, 30, 30),
+        child: CustomCard(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                TextField(
+                  controller: emailController,
+                  decoration: const InputDecoration(
+                    labelText: 'Email',
+                    border: OutlineInputBorder(),
+                    prefixIcon: Icon(Icons.email),
                   ),
+                  keyboardType: TextInputType.emailAddress,
                 ),
-              )),
+                const SizedBox(height: 20),
+                TextField(
+                  controller: passwordController,
+                  decoration: const InputDecoration(
+                    labelText: 'Password',
+                    border: OutlineInputBorder(),
+                    prefixIcon: Icon(Icons.lock),
+                  ),
+                  obscureText: true,
+                ),
+                const SizedBox(height: 40),
+                ElevatedButton(
+                  onPressed: () {
+                    viewModel
+                        .login(emailController.text, passwordController.text)
+                        .then((_) {
+                      if (viewModel.isLoggedIn) {
+                        Navigator.pushReplacementNamed(
+                            context, RouteGenerator.homeScreen);
+                      } else {
+                        const snackBar = SnackBar(
+                            content: Text('Login Failed. Please try again.'));
+                        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                      }
+                    });
+                  },
+                  style: ElevatedButton.styleFrom(
+                    minimumSize: const Size(double.infinity, 50),
+                  ),
+                  child: const Text('Login'),
+                ),
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pushReplacementNamed('/register');
+                  },
+                  child: const Text('Don\'t have an account? Register'),
+                ),
+              ],
+            ),
+          ),
         ),
-      )),
+      ),
     );
   }
 }

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:online_reservation/Data/API%20Services/employee.service.dart';
+import 'package:online_reservation/Data/API_Services/employee.service.dart';
 import 'package:online_reservation/Data/Models/employee.model.dart';
 
 
@@ -9,7 +9,7 @@ class EmployeeViewModel extends ChangeNotifier {
   List<Employee> _employees = [];
   List<Employee> get employees => _employees;
 
-  bool _isLoading = true;
+  bool _isLoading = false;
   bool get isLoading => _isLoading;
 
   String _errorMessage = '';

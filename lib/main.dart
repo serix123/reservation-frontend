@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:online_reservation/Presentation/Modules/Authentication/auth.viewmodel.dart';
 import 'package:online_reservation/Presentation/Modules/Employee/employee.view.dart';
 import 'package:online_reservation/Presentation/Modules/Employee/employee.viewmodel.dart';
+import 'package:online_reservation/Presentation/Modules/Facility/facilityList.viewmodel.dart';
 import 'package:online_reservation/Presentation/Modules/Screens/first.screen.dart';
 import 'package:online_reservation/Presentation/Modules/Screens/second.screen.dart';
 import 'package:online_reservation/Presentation/route/route.generator.dart';
@@ -22,6 +23,7 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (context) => EmployeeViewModel()),
         ChangeNotifierProvider(create: (context) => AuthenticationViewModel()),
+        ChangeNotifierProvider(create: (context) => FacilityViewModel()),
       ],
       builder: (context, child) {
         return MaterialApp(
@@ -96,6 +98,12 @@ class _MyHomePageState extends State<MyHomePage> {
             title: "My Reservations",
             icon: Icons.list,
             routeName: '/myReservations',
+          ),
+          cardTile(
+            context,
+            title: "Facilities",
+            icon: Icons.business,
+            routeName: RouteGenerator.facilityScreen,
           ),
         ],
       ),

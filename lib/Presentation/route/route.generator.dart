@@ -4,6 +4,7 @@ import 'package:online_reservation/Presentation/Modules/Authentication/login.vie
 import 'package:online_reservation/Presentation/Modules/Authentication/register.view.dart';
 import 'package:online_reservation/Presentation/Modules/Calendar/calendar.view.dart';
 import 'package:online_reservation/Presentation/Modules/Employee/employee.view.dart';
+import 'package:online_reservation/Presentation/Modules/Facility/facilityList.view.dart';
 import 'package:online_reservation/Presentation/Modules/Reservation/reservation.view.dart';
 import 'package:online_reservation/Presentation/Modules/Screens/first.screen.dart';
 import 'package:online_reservation/Presentation/Modules/Screens/request.detail.dart';
@@ -22,6 +23,7 @@ class RouteGenerator {
   static const employeeScreen = EmployeesScreen.screen_id;
   static const calendarScreen = CalendarScreen.screen_id;
   static const reservationScreen = ReservationScreen.screen_id;
+  static const facilityScreen = FacilitiesScreen.screen_id;
 
 
 
@@ -30,8 +32,8 @@ class RouteGenerator {
     final args = settings.arguments;
 
     if (settings.name == homeScreen) {
-      // if (true) {
-      if (authViewModel.isLoggedIn) {
+      if (true) {
+      // if (authViewModel.isLoggedIn) {
         return MaterialPageRoute(builder: (_) => const MyHomePage(title: 'Home',));
       } else {
         return MaterialPageRoute(builder: (_) => const LoginScreen());
@@ -53,6 +55,8 @@ class RouteGenerator {
         return MaterialPageRoute(builder: (_) => const CalendarScreen());
       case reservationScreen:
         return MaterialPageRoute(builder: (_) => const ReservationScreen());
+      case facilityScreen:
+        return MaterialPageRoute(builder: (_) => const FacilitiesScreen());
       // case RequestListScreen.screen_id:
       //   return MaterialPageRoute(builder: (_) => const RequestListScreen());
       // case RequestDetailScreen.screen_id:

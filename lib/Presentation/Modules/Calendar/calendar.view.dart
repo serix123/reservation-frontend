@@ -55,19 +55,19 @@ class _CalendarScreenState extends State<CalendarScreen> {
     super.initState();
     events = [
       Event(
-        name: "Team Standup",
+        event_name: "Team Standup",
         start_time: DateTime.now().add(Duration(hours: 0)), // 9:00
         end_time: DateTime.now().add(Duration(hours: 0, minutes: 30)), // 9:30
       ),
       Event(
-        name: "Client Call",
+        event_name: "Client Call",
         start_time: DateTime.now().add(Duration(hours: 0, minutes: 30)), // 9:30
         end_time: DateTime.now().add(Duration(hours: 3)), // 10:00
       ),
     ];
     events.forEach((element) {
       print(
-          '${(element.name)}: ${roundToNearestQuarter(element.start_time)} - ${roundToNearestQuarter(element.end_time)}');
+          '${(element.event_name)}: ${roundToNearestQuarter(element.start_time)} - ${roundToNearestQuarter(element.end_time)}');
     });
   }
 
@@ -132,7 +132,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                           child: Container(
                               padding: EdgeInsets.all(5),
                               height: height - 2,
-                              child: Text(event.name))),
+                              child: Text(event.event_name))),
                       // child: Container(
                       //   height: height,
                       //   padding: EdgeInsets.zero,

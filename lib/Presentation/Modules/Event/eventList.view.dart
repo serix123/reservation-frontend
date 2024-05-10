@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:online_reservation/Presentation/Modules/Approval/approvalList.viewmodel.dart';
-import 'package:online_reservation/Presentation/Modules/Employee/employee.viewmodel.dart';
+import 'package:online_reservation/Data/Models/event.model.dart';
 import 'package:online_reservation/Presentation/Modules/Event/event.viewmodel.dart';
 import 'package:online_reservation/Presentation/Modules/Widgets/customPurpleContainer.widget.dart';
 import 'package:online_reservation/Presentation/Modules/Widgets/responsiveLayout.widget.dart';
@@ -15,17 +14,26 @@ class EventListScreen extends StatefulWidget {
 }
 
 class _EventListScreenState extends State<EventListScreen> {
-
+  List<Event>? lists;
   Future<void> fetchDataFromAPI() async {
     try {
       // Gather all asynchronous operations.
       await Future.wait([
-        Provider.of<EventViewModel>(context, listen: false).fetchUserEvents()
+        Provider.of<EventViewModel>(context, listen: false).fetchAllEvents(),
+        Provider.of<EventViewModel>(context, listen: false).fetchUserEvents(),
       ]);
 
       // Use a short delay to simulate a network call (if needed).
       await Future.delayed(Duration(seconds: 1));
 
+      // Check if the widget is still mounted before calling setState.
+      if (mounted) {
+        setState(() {
+          lists =
+              Provider.of<EventViewModel>(context, listen: false).userEvents;
+
+        });
+      }
     } catch (error) {
       // Handle or log errors
       print('Error fetching data: $error');
@@ -43,7 +51,7 @@ class _EventListScreenState extends State<EventListScreen> {
   Widget body() {
     return Consumer<EventViewModel>(
       builder: (BuildContext context, eventViewModel, Widget? child) {
-        if (eventViewModel.isLoading) {
+        if (eventViewModel.isLoading || lists == null ) {
           return const Center(child: CircularProgressIndicator());
         }
         return SingleChildScrollView(
@@ -51,9 +59,9 @@ class _EventListScreenState extends State<EventListScreen> {
             children: [
               ListView.builder(
                 shrinkWrap: true,
-                itemCount: eventViewModel.events.length,
+                itemCount: lists!.length,
                 itemBuilder: (context, index) {
-                  final event = eventViewModel.userEvents[index];
+                  final event = lists![index];
                   return Padding(
                     padding: const EdgeInsets.symmetric(
                         horizontal: 32.0, vertical: 12),

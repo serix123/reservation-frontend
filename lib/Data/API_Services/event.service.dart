@@ -29,8 +29,9 @@ class EventAPIService {
         throw Exception('Failed to load events');
       }
     } catch (e) {
-      throw Exception('Failed to load events: $e');
+      print('error: $e');
     }
+    return [];
   }
 
   Future<List<Event>> fetchUserEvents() async {
@@ -45,6 +46,7 @@ class EventAPIService {
       );
       if (response.statusCode == 200) {
         List<dynamic> body = json.decode(response.body);
+        print(body);
         List<Event> events =
             body.map((dynamic item) => Event.fromJson(item)).toList();
         return events;
@@ -52,8 +54,9 @@ class EventAPIService {
         throw Exception('Failed to load user events');
       }
     } catch (e) {
-      throw Exception('Failed to load user events: $e');
+      print('error: $e');
     }
+    return [];
   }
 
   Future<bool> registerEvent(Event event) async {

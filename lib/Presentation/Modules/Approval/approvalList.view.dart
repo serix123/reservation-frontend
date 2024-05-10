@@ -35,10 +35,8 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
       // Check if the widget is still mounted before calling setState.
       if (mounted) {
         setState(() {
-          lists = Provider.of<EmployeeViewModel>(context, listen: false)
-              .approvals
-              .where((element) => element.immediate_head_status == 0)
-              .toList();
+          lists =
+              Provider.of<EmployeeViewModel>(context, listen: false).approvals;
           _listValue = ListType.Self;
         });
       }
@@ -331,15 +329,45 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
                       break;
                     case ListType.ImmediateHead:
                       // TODO: Handle this case.
-                      await approvalViewModel.approveByHead(slipNo);
+                      if (await approvalViewModel.approveByHead(slipNo)) {
+                        await Provider.of<EmployeeViewModel>(context,
+                                listen: false)
+                            .fetchProfile();
+                        setState(() {
+                          _listValue = ListType.Self;
+                          lists = Provider.of<EmployeeViewModel>(context,
+                                  listen: false)
+                              .approvals;
+                        });
+                      }
                       break;
                     case ListType.PersonInCharge:
                       // TODO: Handle this case.
-                      await approvalViewModel.approveByPIC(slipNo);
+                      if (await approvalViewModel.approveByPIC(slipNo)) {
+                        await Provider.of<EmployeeViewModel>(context,
+                                listen: false)
+                            .fetchProfile();
+                        setState(() {
+                          _listValue = ListType.Self;
+                          lists = Provider.of<EmployeeViewModel>(context,
+                                  listen: false)
+                              .approvals;
+                        });
+                      }
                       break;
                     case ListType.Admin:
                       // TODO: Handle this case.
-                      await approvalViewModel.approveAdmin(slipNo);
+                      if (await approvalViewModel.approveAdmin(slipNo)) {
+                        await Provider.of<EmployeeViewModel>(context,
+                                listen: false)
+                            .fetchProfile();
+                        setState(() {
+                          _listValue = ListType.Self;
+                          lists = Provider.of<EmployeeViewModel>(context,
+                                  listen: false)
+                              .approvals;
+                        });
+                      }
                       break;
                   }
                   // _approveItem(index, approved);
@@ -358,15 +386,45 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
                       break;
                     case ListType.ImmediateHead:
                       // TODO: Handle this case.
-                      await approvalViewModel.rejectByHead(slipNo);
+                      if (await approvalViewModel.rejectByHead(slipNo)) {
+                        await Provider.of<EmployeeViewModel>(context,
+                                listen: false)
+                            .fetchProfile();
+                        setState(() {
+                          _listValue = ListType.Self;
+                          lists = Provider.of<EmployeeViewModel>(context,
+                                  listen: false)
+                              .approvals;
+                        });
+                      }
                       break;
                     case ListType.PersonInCharge:
                       // TODO: Handle this case.
-                      await approvalViewModel.rejectByPIC(slipNo);
+                      if (await approvalViewModel.rejectByPIC(slipNo)) {
+                        await Provider.of<EmployeeViewModel>(context,
+                                listen: false)
+                            .fetchProfile();
+                        setState(() {
+                          _listValue = ListType.Self;
+                          lists = Provider.of<EmployeeViewModel>(context,
+                                  listen: false)
+                              .approvals;
+                        });
+                      }
                       break;
                     case ListType.Admin:
                       // TODO: Handle this case.
-                      await approvalViewModel.rejectAdmin(slipNo);
+                      if (await approvalViewModel.rejectAdmin(slipNo)) {
+                        await Provider.of<EmployeeViewModel>(context,
+                                listen: false)
+                            .fetchProfile();
+                        setState(() {
+                          _listValue = ListType.Self;
+                          lists = Provider.of<EmployeeViewModel>(context,
+                                  listen: false)
+                              .approvals;
+                        });
+                      }
                       break;
                   }
                 },
@@ -378,5 +436,4 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
       },
     );
   }
-
 }

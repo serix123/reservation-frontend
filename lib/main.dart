@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:online_reservation/Presentation/Modules/Screens/first.screen.dart';
-import 'package:online_reservation/Presentation/Modules/Screens/second.screen.dart';
-import 'package:online_reservation/route/route.generator.dart';
+import 'package:online_reservation/Presentation/Modules/Approval/approvalList.viewmodel.dart';
+import 'package:online_reservation/Presentation/Modules/Authentication/auth.viewmodel.dart';
+import 'package:online_reservation/Presentation/Modules/Employee/employee.viewmodel.dart';
+import 'package:online_reservation/Presentation/Modules/Event/event.viewmodel.dart';
+import 'package:online_reservation/Presentation/Modules/Facility/facilityList.viewmodel.dart';
+import 'package:online_reservation/Presentation/Modules/Reservation/reservation.viewmodel.dart';
+import 'package:online_reservation/Presentation/Modules/Widgets/responsiveLayout.widget.dart';
+import 'package:online_reservation/Presentation/route/route.generator.dart';
+import 'package:provider/provider.dart';
 
 void main() {
   runApp(const MyApp());
@@ -13,19 +19,30 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
-      routes: {
-        '/first': (_) => const FirstScreen(),
-        '/second': (_) => const SecondScreen()
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => AuthenticationViewModel()),
+        ChangeNotifierProvider(create: (context) => FacilityViewModel()),
+        ChangeNotifierProvider(create: (context) => EmployeeViewModel()),
+        ChangeNotifierProvider(create: (context) => EquipmentViewModel()),
+        ChangeNotifierProvider(create: (context) => EventViewModel()),
+        ChangeNotifierProvider(create: (context) => ApprovalViewModel()),
+      ],
+      builder: (context, child) {
+        return MaterialApp(
+          debugShowCheckedModeBanner: false,
+          title: 'Online Reservation App',
+          theme: ThemeData(
+            colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+            useMaterial3: true,
+          ),
+          // home: const MyHomePage(title: 'Flutter Demo Home Page'),
+          initialRoute: RouteGenerator.homeScreen,
+          // initialRoute: RouteGenerator.approvalListScreen,
+          onGenerateRoute: (settings) =>
+              RouteGenerator.generateRoute(settings, context),
+        );
       },
-      initialRoute: '/',
-      onGenerateRoute: RouteGenerator.generateRoute,
     );
   }
 }
@@ -47,32 +64,98 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(widget.title),
+    Provider.of<EmployeeViewModel>(context,listen: false).fetchProfile();
+    return ResponsiveLayout(
+      mobileBody: ListView(
+        children: <Widget>[
+          cardTile(
+            context,
+            title: "Online Reservation",
+            icon: Icons.book_online,
+            routeName: RouteGenerator.reservationScreen,
+          ),
+          cardTile(
+            context,
+            title: "Request Approval",
+            icon: Icons.approval,
+            routeName: '/requestApproval',
+          ),
+          cardTile(
+            context,
+            title: "Scheduled Reservations",
+            icon: Icons.schedule,
+            routeName: RouteGenerator.calendarScreen,
+          ),
+          cardTile(
+            context,
+            title: "My Reservations",
+            icon: Icons.list,
+            routeName: '/myReservations',
+          ),
+          cardTile(
+            context,
+            title: "Facilities",
+            icon: Icons.business,
+            routeName: RouteGenerator.facilityScreen,
+          ),
+        ],
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'Home Page',
-            ),
-            ElevatedButton(
-                onPressed: () {
-                  Navigator.of(context).pushNamed('/first');
-                },
-                child: const Text("Change Screen")),
-            ElevatedButton(
-                onPressed: () {
-                  Navigator.of(context).pushNamed('/second');
-                },
-                child: const Text("Change Screen")),
-          ],
-        ),
+      desktopBody: ListView(
+        children: <Widget>[
+          cardTile(
+            context,
+            title: "Online Reservation",
+            icon: Icons.book_online,
+            routeName: RouteGenerator.reservationScreen,
+          ),
+          cardTile(
+            context,
+            title: "Request Approval",
+            icon: Icons.approval,
+            routeName: '/requestApproval',
+          ),
+          cardTile(
+            context,
+            title: "Scheduled Reservations",
+            icon: Icons.schedule,
+            routeName: RouteGenerator.calendarScreen,
+          ),
+          cardTile(
+            context,
+            title: "My Reservations",
+            icon: Icons.list,
+            routeName: '/myReservations',
+          ),
+          cardTile(
+            context,
+            title: "Facilities",
+            icon: Icons.business,
+            routeName: RouteGenerator.facilityScreen,
+          ),
+        ],
       ),
-      // This trailing comma makes auto-formatting nicer for build methods.
+      currentRoute: MyHomePage.screen_id,
+      title: 'Home',
+    );
+  }
+
+  Widget cardTile(BuildContext context,
+      {required String title,
+      required IconData icon,
+      required String routeName}) {
+    return Card(
+      margin: const EdgeInsets.all(8),
+      elevation: 2, // Adjust shadow elevation
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10), // Rounded corners
+      ),
+      child: ListTile(
+        leading: Icon(icon, color: Theme.of(context).primaryColor),
+        title: Text(title),
+        onTap: () => Navigator.of(context).pushNamed(routeName),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      ),
     );
   }
 }

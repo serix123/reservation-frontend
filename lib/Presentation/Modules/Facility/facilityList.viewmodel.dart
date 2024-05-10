@@ -6,7 +6,7 @@ import 'package:online_reservation/Data/Models/facility.model.dart';
 import 'package:online_reservation/Data/Models/facility.model.dart';
 
 
-class FacilityViewModel extends ChangeNotifier {
+class   FacilityViewModel extends ChangeNotifier {
   final FacilityAPIService _apiService = FacilityAPIService();
 
   List<Facility> _facilities = [];

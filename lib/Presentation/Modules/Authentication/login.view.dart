@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:online_reservation/Presentation/Modules/Widgets/textFieldForm.widget.dart';
+import 'package:provider/provider.dart';
+
 import 'package:online_reservation/Presentation/Modules/Authentication/auth.viewmodel.dart';
 import 'package:online_reservation/Presentation/Modules/Widgets/customCard.widget.dart';
 import 'package:online_reservation/Presentation/route/route.generator.dart';
-import 'package:provider/provider.dart';
+import 'package:online_reservation/config/app.color.dart';
 
 class LoginScreen extends StatelessWidget {
   static const String screen_id = "/login";
@@ -29,9 +32,28 @@ class LoginScreen extends StatelessWidget {
               children: <Widget>[
                 TextField(
                   controller: emailController,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: Colors.deepPurple.shade50,
                     labelText: 'Email',
-                    border: OutlineInputBorder(),
+                    border: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Colors.deepPurple.shade50,
+                        width: 2,
+                      ),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Colors.deepPurple.shade50,
+                        width: 2,
+                      ),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: const BorderSide(
+                          color: kPurpleDark, width: 2),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
                     prefixIcon: Icon(Icons.email),
                   ),
                   keyboardType: TextInputType.emailAddress,
@@ -39,9 +61,28 @@ class LoginScreen extends StatelessWidget {
                 const SizedBox(height: 20),
                 TextField(
                   controller: passwordController,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'Password',
-                    border: OutlineInputBorder(),
+                    filled: true,
+                    fillColor: Colors.deepPurple.shade50,
+                    border: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Colors.deepPurple.shade50,
+                        width: 2,
+                      ),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Colors.deepPurple.shade50,
+                        width: 2,
+                      ),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: const BorderSide(
+                          color: kPurpleDark, width: 2),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
                     prefixIcon: Icon(Icons.lock),
                   ),
                   obscureText: true,

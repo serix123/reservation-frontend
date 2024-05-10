@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:online_reservation/Data/Models/facility.model.dart';
+import 'package:provider/provider.dart';
 
 import 'package:online_reservation/Presentation/Modules/Facility/facilityList.viewmodel.dart';
-import 'package:provider/provider.dart';
+import 'package:online_reservation/Presentation/Modules/Widgets/responsiveLayout.widget.dart';
+import 'package:online_reservation/Presentation/Modules/Widgets/facilityCard.widget.dart';
+
 
 class FacilitiesScreen extends StatefulWidget {
   static const screen_id = "/facility";
@@ -10,7 +12,7 @@ class FacilitiesScreen extends StatefulWidget {
   const FacilitiesScreen({super.key});
 
   @override
-  _FacilitiesScreenState createState() => _FacilitiesScreenState();
+  State<FacilitiesScreen> createState() => _FacilitiesScreenState();
 }
 
 class _FacilitiesScreenState extends State<FacilitiesScreen> {
@@ -21,9 +23,9 @@ class _FacilitiesScreenState extends State<FacilitiesScreen> {
   void initState() {
     super.initState();
 
-    // Future.microtask(() =>
-    //     Provider.of<FacilityViewModel>(context, listen: false).fetchFacilities()
-    // );
+    Future.microtask(() =>
+        Provider.of<FacilityViewModel>(context, listen: false).fetchFacilities()
+    );
   }
 
   @override
@@ -31,34 +33,33 @@ class _FacilitiesScreenState extends State<FacilitiesScreen> {
     // final viewModel =
     //     Provider.of<FacilityViewModel>(context, listen: false);
     // final List<Facility> facilities = viewModel.facilities;
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("Facilities"),
-      ),
-      body: Consumer<FacilityViewModel>(
-        builder: (context, viewModel, child) {
-          if (viewModel.isLoading) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if(viewModel.errorMessage.isNotEmpty){
-            return Center(child: Text(viewModel.errorMessage));
-          }
-          return ListView.builder(
+    return ResponsiveLayout(
+      mobileBody: body(),
+      desktopBody: body(),
+      currentRoute: FacilitiesScreen.screen_id,
+      title: 'Facilities',
+    );
+  }
+
+  Widget body() {
+    return Consumer<FacilityViewModel>(
+      builder: (context, viewModel, child) {
+        if (viewModel.isLoading) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if(viewModel.errorMessage.isNotEmpty){
+          return Center(child: Text(viewModel.errorMessage));
+        }
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: ListView.builder(
             itemCount: viewModel.facilities.length,
             itemBuilder: (context, index) {
-              Facility facility = viewModel.facilities[index];
-              return ListTile(
-                title: Text(facility.name),
-                subtitle: Text("Some description..."),
-                onTap: () {
-                  // Placeholder for navigation or further interaction
-                  print("Tapped on ${facility.name}");
-                },
-              );
+              return FacilityCard(facility: viewModel.facilities[index]);
             },
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
   }
 }

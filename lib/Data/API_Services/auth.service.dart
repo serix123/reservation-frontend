@@ -35,13 +35,13 @@ class AuthService {
   Future<bool> register(RegistrationCredentials credentials) async {
     try {
       final response = await http.post(
-        Uri.parse('$authURL/register'),
+        Uri.parse('${authURL}register/'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
         body: jsonEncode({
-          'firstName': credentials.first_name,
-          'lastName': credentials.last_name,
+          'first_name': credentials.first_name,
+          'last_name': credentials.last_name,
           'email': credentials.email,
           'password': credentials.password,
           'password2': credentials.password2,
@@ -52,6 +52,7 @@ class AuthService {
         // Assuming the API returns a token upon successful registration
         // final data = jsonDecode(response.body);
         // await storage.write(key: 'token', value: data['token']);
+        print("registration success!");
         return true;
       } else {
         // Handle different status codes appropriately

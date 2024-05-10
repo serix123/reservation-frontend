@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:online_reservation/Data/Models/event.model.dart';
 import 'package:online_reservation/Presentation/Modules/Widgets/customCard.widget.dart';
+import 'package:online_reservation/Presentation/Modules/Widgets/responsiveLayout.widget.dart';
 import 'package:online_reservation/config/app.color.dart';
 import 'package:table_calendar/table_calendar.dart';
 
@@ -56,11 +57,13 @@ class _CalendarScreenState extends State<CalendarScreen> {
     events = [
       Event(
         event_name: "Team Standup",
+        event_description: "Team Standup",
         start_time: DateTime.now().add(Duration(hours: 0)), // 9:00
         end_time: DateTime.now().add(Duration(hours: 0, minutes: 30)), // 9:30
       ),
       Event(
         event_name: "Client Call",
+        event_description: "Client Call",
         start_time: DateTime.now().add(Duration(hours: 0, minutes: 30)), // 9:30
         end_time: DateTime.now().add(Duration(hours: 3)), // 10:00
       ),
@@ -73,89 +76,93 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("Schedule Calendar"),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            Container(
-              color: Colors.white,
-              child: TableCalendar(
-                firstDay: DateTime.utc(2010, 10, 16),
-                lastDay: DateTime.utc(2030, 3, 14),
-                focusedDay: _focusedDay,
-                selectedDayPredicate: (day) {
-                  return isSameDay(_selectedDay, day);
-                },
-                onDaySelected: (selectedDay, focusedDay) {
-                  setState(() {
-                    _selectedDay = selectedDay;
-                    _focusedDay = focusedDay;
-                  });
-                },
-              ),
+    return ResponsiveLayout(
+      mobileBody: body(),
+      desktopBody: body(),
+      currentRoute: CalendarScreen.screen_id,
+      title: 'Schedules',
+    );
+  }
+
+  Widget body() {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        children: [
+          Container(
+            color: Colors.white,
+            child: TableCalendar(
+              firstDay: DateTime.utc(2010, 10, 16),
+              lastDay: DateTime.utc(2030, 3, 14),
+              focusedDay: _focusedDay,
+              selectedDayPredicate: (day) {
+                return isSameDay(_selectedDay, day);
+              },
+              onDaySelected: (selectedDay, focusedDay) {
+                setState(() {
+                  _selectedDay = selectedDay;
+                  _focusedDay = focusedDay;
+                });
+              },
             ),
-            Expanded(
-              child: ListView.builder(
-                itemCount: 24,
-                // separatorBuilder: (context, index) => const Divider(height: 1),
-                // 24 hour slots
-                itemBuilder: (context, index) {
-                  // Collect events for this hour
-                  List<Widget> hourEvents = events
-                      .where((event) => event.start_time.day == _focusedDay.day)
-                      .where((event) {
-                    return roundToNearestQuarter(event.start_time).hour == index;
-                  }).map((event) {
-                    double topMargin =
-                        (roundToNearestQuarter(event.start_time).minute /
-                            1); // Adjust top margin based on start time
-                    double height = _getEventHeight(
-                        roundToNearestQuarter(event.start_time),
-                        roundToNearestQuarter(
-                            event.end_time)); // Adjust height based on duration
-                    return Positioned(
+          ),
+          Expanded(
+            child: ListView.builder(
+              itemCount: 24,
+              // separatorBuilder: (context, index) => const Divider(height: 1),
+              // 24 hour slots
+              itemBuilder: (context, index) {
+                // Collect events for this hour
+                List<Widget> hourEvents = events
+                    .where((event) => event.start_time.day == _focusedDay.day)
+                    .where((event) {
+                  return roundToNearestQuarter(event.start_time).hour == index;
+                }).map((event) {
+                  double topMargin =
+                  (roundToNearestQuarter(event.start_time).minute /
+                      1); // Adjust top margin based on start time
+                  double height = _getEventHeight(
+                      roundToNearestQuarter(event.start_time),
+                      roundToNearestQuarter(
+                          event.end_time)); // Adjust height based on duration
+                  return Positioned(
 
-                      top: topMargin,
-                      left: 100,
-                      right: 0,
-                      child: Card(
-                          clipBehavior: Clip.antiAliasWithSaveLayer,
-                          color: kBackgroundGrey,
-                          elevation: 3,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Container(
-                              padding: EdgeInsets.all(5),
-                              height: height - 2,
-                              child: Text(event.event_name))),
-                      // child: Container(
-                      //   height: height,
-                      //   padding: EdgeInsets.zero,
-                      //   color: Colors.blue[300],
-                      //   child: Text(event.name),
-                      // ),
-                    );
-                  }).toList();
-
-                  return Stack(
-                    clipBehavior: Clip.none,
-                    children: [
-                      ListTile(
-                        title: Text('${index.toString().padLeft(2, '0')}:00'),
-                      ),
-                      ...hourEvents,
-                    ],
+                    top: topMargin,
+                    left: 100,
+                    right: 0,
+                    child: Card(
+                        clipBehavior: Clip.antiAliasWithSaveLayer,
+                        color: kBackgroundGrey,
+                        elevation: 3,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Container(
+                            padding: EdgeInsets.all(5),
+                            height: height - 2,
+                            child: Text(event.event_name??""))),
+                    // child: Container(
+                    //   height: height,
+                    //   padding: EdgeInsets.zero,
+                    //   color: Colors.blue[300],
+                    //   child: Text(event.name),
+                    // ),
                   );
-                },
-              ),
+                }).toList();
+
+                return Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    ListTile(
+                      title: Text('${index.toString().padLeft(2, '0')}:00'),
+                    ),
+                    ...hourEvents,
+                  ],
+                );
+              },
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

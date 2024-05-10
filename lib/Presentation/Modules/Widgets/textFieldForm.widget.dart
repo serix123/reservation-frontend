@@ -27,11 +27,11 @@ class CustomTextFormField extends StatelessWidget {
         labelText: labelText,
         hintText: hintText,
         filled: true,
-        fillColor: kDefaultLightGrey,
+        fillColor: Colors.deepPurple.shade50,
         suffixIcon: suffixIcon,
         enabledBorder: OutlineInputBorder(
-          borderSide: const BorderSide(
-            color: kDefaultLightGrey,
+          borderSide: BorderSide(
+            color: Colors.deepPurple.shade50,
             width: 2,
           ),
           borderRadius: BorderRadius.circular(6),

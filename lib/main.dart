@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:online_reservation/Presentation/Modules/Approval/approvalList.viewmodel.dart';
 import 'package:online_reservation/Presentation/Modules/Authentication/auth.viewmodel.dart';
-import 'package:online_reservation/Presentation/Modules/Employee/employee.view.dart';
 import 'package:online_reservation/Presentation/Modules/Employee/employee.viewmodel.dart';
+import 'package:online_reservation/Presentation/Modules/Event/event.viewmodel.dart';
 import 'package:online_reservation/Presentation/Modules/Facility/facilityList.viewmodel.dart';
-import 'package:online_reservation/Presentation/Modules/Screens/first.screen.dart';
-import 'package:online_reservation/Presentation/Modules/Screens/second.screen.dart';
+import 'package:online_reservation/Presentation/Modules/Reservation/reservation.viewmodel.dart';
+import 'package:online_reservation/Presentation/Modules/Widgets/responsiveLayout.widget.dart';
 import 'package:online_reservation/Presentation/route/route.generator.dart';
-import 'package:online_reservation/config/scrollbar.behavior.dart';
 import 'package:provider/provider.dart';
 
 void main() {
@@ -21,9 +21,12 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (context) => EmployeeViewModel()),
         ChangeNotifierProvider(create: (context) => AuthenticationViewModel()),
         ChangeNotifierProvider(create: (context) => FacilityViewModel()),
+        ChangeNotifierProvider(create: (context) => EmployeeViewModel()),
+        ChangeNotifierProvider(create: (context) => EquipmentViewModel()),
+        ChangeNotifierProvider(create: (context) => EventViewModel()),
+        ChangeNotifierProvider(create: (context) => ApprovalViewModel()),
       ],
       builder: (context, child) {
         return MaterialApp(
@@ -35,6 +38,7 @@ class MyApp extends StatelessWidget {
           ),
           // home: const MyHomePage(title: 'Flutter Demo Home Page'),
           initialRoute: RouteGenerator.homeScreen,
+          // initialRoute: RouteGenerator.approvalListScreen,
           onGenerateRoute: (settings) =>
               RouteGenerator.generateRoute(settings, context),
         );
@@ -60,20 +64,9 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("Home"),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.notifications),
-            onPressed: () {
-              // Handle notification icon press
-              print("Notifications pressed");
-            },
-          ),
-        ],
-      ),
-      body: ListView(
+    Provider.of<EmployeeViewModel>(context,listen: false).fetchProfile();
+    return ResponsiveLayout(
+      mobileBody: ListView(
         children: <Widget>[
           cardTile(
             context,
@@ -107,12 +100,51 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         ],
       ),
+      desktopBody: ListView(
+        children: <Widget>[
+          cardTile(
+            context,
+            title: "Online Reservation",
+            icon: Icons.book_online,
+            routeName: RouteGenerator.reservationScreen,
+          ),
+          cardTile(
+            context,
+            title: "Request Approval",
+            icon: Icons.approval,
+            routeName: '/requestApproval',
+          ),
+          cardTile(
+            context,
+            title: "Scheduled Reservations",
+            icon: Icons.schedule,
+            routeName: RouteGenerator.calendarScreen,
+          ),
+          cardTile(
+            context,
+            title: "My Reservations",
+            icon: Icons.list,
+            routeName: '/myReservations',
+          ),
+          cardTile(
+            context,
+            title: "Facilities",
+            icon: Icons.business,
+            routeName: RouteGenerator.facilityScreen,
+          ),
+        ],
+      ),
+      currentRoute: MyHomePage.screen_id,
+      title: 'Home',
     );
   }
 
-  Widget cardTile(BuildContext context, {required String title, required IconData icon, required String routeName}) {
+  Widget cardTile(BuildContext context,
+      {required String title,
+      required IconData icon,
+      required String routeName}) {
     return Card(
-      margin: EdgeInsets.all(8),
+      margin: const EdgeInsets.all(8),
       elevation: 2, // Adjust shadow elevation
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(10), // Rounded corners
@@ -121,7 +153,8 @@ class _MyHomePageState extends State<MyHomePage> {
         leading: Icon(icon, color: Theme.of(context).primaryColor),
         title: Text(title),
         onTap: () => Navigator.of(context).pushNamed(routeName),
-        contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       ),
     );
   }

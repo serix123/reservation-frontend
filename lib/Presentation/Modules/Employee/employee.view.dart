@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:online_reservation/Presentation/Modules/Authentication/auth.viewmodel.dart';
 import 'package:online_reservation/Presentation/Modules/Employee/employee.viewmodel.dart';
 import 'package:provider/provider.dart';
 
@@ -25,6 +26,9 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
     // _viewModel.fetchEmployees();
     Future.microtask(() =>
         Provider.of<EmployeeViewModel>(context, listen: false).fetchEmployees()
+    );
+    Future.microtask(() =>
+        Provider.of<AuthenticationViewModel>(context, listen: false).refreshAccessToken()
     );
   }
 

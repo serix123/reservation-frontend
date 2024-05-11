@@ -1,7 +1,5 @@
 import 'package:http/http.dart' as http;
 import 'package:online_reservation/Data/Models/facility.model.dart';
-import 'package:online_reservation/Data/Models/facility.model.dart';
-import 'package:online_reservation/Data/Models/facility.model.dart';
 import 'dart:convert';
 
 import 'package:online_reservation/config/host.dart';

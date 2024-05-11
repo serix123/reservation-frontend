@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
@@ -88,8 +89,10 @@ class AuthService {
         await storage.write(key: "access", value: token.accessToken);
         await storage.write(key: "refresh", value: token.refreshToken);
         return true;
+      } else {
+        throw Exception(
+            'Failed to get refresh token. Status code: ${response.statusCode}');
       }
-      return false;
     } catch (e) {
       print(e);
       return false;

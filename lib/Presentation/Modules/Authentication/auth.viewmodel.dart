@@ -1,4 +1,6 @@
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:online_reservation/Data/API_Services/auth.service.dart';
 import 'package:online_reservation/Data/Models/auth.model.dart';
@@ -6,12 +8,26 @@ import 'package:online_reservation/Data/Models/auth.model.dart';
 
 class AuthenticationViewModel extends ChangeNotifier {
   final AuthService _authService = AuthService();
-  bool _isLoggedIn = false;
+  static const Duration _refreshInterval = Duration(minutes: 5);
+  Timer? _timer;
 
+  void _startRefreshTimer() {
+    _timer = Timer.periodic(_refreshInterval, (timer) {
+      refreshAccessToken();
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+  bool _isLoggedIn = false;
   bool get isLoggedIn => _isLoggedIn;
 
   AuthenticationViewModel() {
     init();
+    _startRefreshTimer();
   }
 
   Future<void> init() async {

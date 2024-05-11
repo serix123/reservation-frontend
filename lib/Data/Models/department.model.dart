@@ -2,7 +2,7 @@
 class Department {
   int id;
   int? immediate_head;
-  String name;
+  String? name;
 
   Department({
     required this.id,
@@ -13,7 +13,7 @@ class Department {
   factory Department.fromJson(Map<String, dynamic> json) {
     return Department(
       id: json['id'],
-      name: json['name'],
+      name: json['name'] ?? "",
       immediate_head: json['immediate_head']!= null ? int.tryParse(json['immediate_head'].toString()) : null,
     );
   }

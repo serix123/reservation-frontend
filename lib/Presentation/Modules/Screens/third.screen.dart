@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:online_reservation/config/app.color.dart';
-import 'package:online_reservation/config/dimensions.dart';
 
 class ThirdScreen extends StatefulWidget {
   const ThirdScreen({super.key});

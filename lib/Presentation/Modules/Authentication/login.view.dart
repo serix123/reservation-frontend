@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:online_reservation/Presentation/Modules/Widgets/textFieldForm.widget.dart';
 import 'package:provider/provider.dart';
 
 import 'package:online_reservation/Presentation/Modules/Authentication/auth.viewmodel.dart';
@@ -95,7 +94,7 @@ class LoginScreen extends StatelessWidget {
                         .then((_) {
                       if (viewModel.isLoggedIn) {
                         Navigator.pushReplacementNamed(
-                            context, RouteGenerator.homeScreen);
+                            context, RouteGenerator.calendarScreen);
                       } else {
                         const snackBar = SnackBar(
                             content: Text('Login Failed. Please try again.'));
@@ -110,7 +109,7 @@ class LoginScreen extends StatelessWidget {
                 ),
                 TextButton(
                   onPressed: () {
-                    Navigator.of(context).pushReplacementNamed('/register');
+                    Navigator.of(context).pushReplacementNamed(RouteGenerator.registerScreen);
                   },
                   child: const Text('Don\'t have an account? Register'),
                 ),

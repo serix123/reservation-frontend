@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:online_reservation/Data/Models/event.model.dart';
 import 'package:online_reservation/Presentation/Modules/Event/event.viewmodel.dart';
+import 'package:online_reservation/Presentation/Modules/Reservation/reservation.view.dart';
 import 'package:online_reservation/Presentation/Modules/Widgets/customPurpleContainer.widget.dart';
 import 'package:online_reservation/Presentation/Modules/Widgets/responsiveLayout.widget.dart';
+import 'package:online_reservation/Presentation/route/route.generator.dart';
+import 'package:online_reservation/config/app.color.dart';
 import 'package:provider/provider.dart';
 
 class EventListScreen extends StatefulWidget {
@@ -31,7 +34,6 @@ class _EventListScreenState extends State<EventListScreen> {
         setState(() {
           lists =
               Provider.of<EventViewModel>(context, listen: false).userEvents;
-
         });
       }
     } catch (error) {
@@ -51,7 +53,7 @@ class _EventListScreenState extends State<EventListScreen> {
   Widget body() {
     return Consumer<EventViewModel>(
       builder: (BuildContext context, eventViewModel, Widget? child) {
-        if (eventViewModel.isLoading || lists == null ) {
+        if (eventViewModel.isLoading || lists == null) {
           return const Center(child: CircularProgressIndicator());
         }
         return SingleChildScrollView(
@@ -68,16 +70,24 @@ class _EventListScreenState extends State<EventListScreen> {
                     child: CustomContainer(
                       child: ListTile(
                         title: Text(
-                          event.event_name ?? "",
+                          "${event.event_name} - ${event.status}",
                           style: TextStyle(
                               fontWeight: FontWeight.w700,
                               fontSize: 16,
                               color: Colors.deepPurple[400]),
                         ),
                         subtitle: Text(event.event_description ?? ""),
-                        trailing: Text(event.status ?? ""),
+                        trailing: IconButton(
+                            onPressed: () {
+                              var args = ReservationScreenArguments(slipNo: event.slip_number,type: RequestType.Update);
+                              Navigator.of(context)
+                                  .pushNamed(RouteGenerator.reservationScreen, arguments: args);
+                            },
+                            icon: const Icon(Icons.remove_red_eye,
+                                color: kPurpleDark)),
                         onTap: () {
                           // Handle the tap event if necessary
+
                           print('Tapped on ${event.event_name}');
                         },
                       ),

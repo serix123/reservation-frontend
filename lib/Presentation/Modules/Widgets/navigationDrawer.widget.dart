@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:online_reservation/Presentation/Modules/Authentication/auth.viewmodel.dart';
 import 'package:online_reservation/Presentation/Modules/Authentication/login.view.dart';
 import 'package:online_reservation/Presentation/Modules/Employee/employee.viewmodel.dart';
-import 'package:online_reservation/Presentation/Modules/Widgets/customListTile.widget.dart';
 import 'package:online_reservation/Presentation/route/route.generator.dart';
 
 import 'package:online_reservation/config/app.color.dart';
@@ -17,8 +16,6 @@ class CustomNavigationDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Provider.of<EmployeeViewModel>(context,listen: false).fetchProfile();
-    bool hasHeadApproval=Provider.of<EmployeeViewModel>(context).immediate_head_approvals.isNotEmpty;
-    bool hasPICApproval=Provider.of<EmployeeViewModel>(context).person_in_charge_approvals.isNotEmpty;
     return Consumer<EmployeeViewModel>(
       builder: (context, employeeViewModel, child) {
         return Drawer(

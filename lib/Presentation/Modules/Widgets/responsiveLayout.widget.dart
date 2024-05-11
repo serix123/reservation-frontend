@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:online_reservation/Presentation/Modules/Employee/employee.viewmodel.dart';
 
 import 'package:online_reservation/Presentation/route/route.generator.dart';
-import 'package:provider/provider.dart';
 import 'navigationDrawer.widget.dart';
 
 class ResponsiveLayout extends StatelessWidget {

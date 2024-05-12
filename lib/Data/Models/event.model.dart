@@ -60,7 +60,7 @@ class Event {
 
   Map<String, dynamic> toJson() => {
     // 'id': id,
-    // 'slip_number': slip_number,
+    'slip_number': slip_number,
     'event_name': event_name,
     'event_description': event_description,
     'contact_number': contact_number,

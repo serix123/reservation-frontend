@@ -47,9 +47,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
               style: Theme.of(context).textTheme.titleLarge,
             ),
             SizedBox(height: 20),
-            _profileDetailField("First Name", viewModel.profile.firstName),
-            _profileDetailField("Last Name", viewModel.profile.lastName),
-            _profileDetailField("Department", viewModel.profile.departmentDetails!.name),
+            _profileDetailField("First Name", viewModel.profile?.firstName ?? ""),
+            _profileDetailField("Last Name", viewModel.profile?.lastName ?? ""),
+            _profileDetailField("Department", viewModel.profile?.departmentDetails?.name ?? ""),
           ],
         ),
       );

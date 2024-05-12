@@ -37,6 +37,9 @@ class Employee {
     List<Approval>? approvals;
     if (approvalsList != null) {
       approvals = approvalsList.map((i) => Approval.fromJson(i)).toList();
+      if(approvals.isEmpty){
+        approvals = [];
+      }
     }
     var immediateHeadApprovalsList = json['immediate_head_approvals']
         as List?; // Safely cast to List or null
@@ -44,6 +47,9 @@ class Employee {
     if (immediateHeadApprovalsList != null) {
       immediateHeadApprovals =
           immediateHeadApprovalsList.map((i) => Approval.fromJson(i)).toList();
+      if(immediateHeadApprovals.isEmpty){
+        immediateHeadApprovals = [];
+      }
     }
     var personInChargeApprovalsList = json['person_in_charge_approvals']
         as List?; // Safely cast to List or null
@@ -51,6 +57,9 @@ class Employee {
     if (personInChargeApprovalsList != null) {
       personInChargeApprovals =
           personInChargeApprovalsList.map((i) => Approval.fromJson(i)).toList();
+      if(personInChargeApprovalsList.isEmpty){
+        personInChargeApprovalsList = [];
+      }
     }
     var managedFacilitiesList =
         json['managed_facilities'] as List?; // Safely cast to List or null
@@ -58,12 +67,15 @@ class Employee {
     if (managedFacilitiesList != null) {
       managedFacilities =
           managedFacilitiesList.map((i) => Facility.fromJson(i)).toList();
+      if(managedFacilities.isEmpty){
+        managedFacilities = [];
+      }
     }
     return Employee(
       id: json['id'],
-      firstName: json['first_name'],
-      lastName: json['last_name'],
-      isAdmin: json['is_admin'],
+      firstName: json['first_name']?? "",
+      lastName: json['last_name']?? "",
+      isAdmin: json['is_admin'] ?? false,
       immediateHead: json['immediate_head'],
       immediateHeadDetails: json['immediate_head_details'] != null
           ? Employee.fromJson(json['immediate_head_details'])

@@ -36,7 +36,6 @@ class _FirstScreenState extends State<FirstScreen> {
   @override
   Widget build(BuildContext context) {
     List<String> displayColumns = showWeek ? daysOfWeek : hoursOfDay;
-    double screenWidth = MediaQuery.of(context).size.width;
     return LayoutBuilder(
       builder: (context, constraints) {
         return Scaffold(

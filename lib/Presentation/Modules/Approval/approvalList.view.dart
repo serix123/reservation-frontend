@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:online_reservation/Data/API_Services/PDF_Services/pdf.service.dart';
+import 'package:online_reservation/Data/API_Services/PDF_Services/pdfApi.service.dart';
 import 'package:online_reservation/Data/Models/approval.model.dart';
 import 'package:online_reservation/Presentation/Modules/Approval/approvalList.viewmodel.dart';
 import 'package:online_reservation/Presentation/Modules/Employee/employee.viewmodel.dart';
+import 'package:online_reservation/Presentation/Modules/Reservation/reservation.view.dart';
 import 'package:online_reservation/Presentation/Modules/Widgets/customPurpleContainer.widget.dart';
 import 'package:online_reservation/Presentation/Modules/Widgets/responsiveLayout.widget.dart';
+import 'package:online_reservation/Presentation/route/route.generator.dart';
 import 'package:online_reservation/Utils/utils.dart';
 import 'package:online_reservation/config/app.color.dart';
 import 'package:provider/provider.dart';
@@ -30,15 +34,13 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
       ]);
 
       // Use a short delay to simulate a network call (if needed).
-      await Future.delayed(Duration(seconds: 1));
+      await Future.delayed(const Duration(seconds: 1));
 
       // Check if the widget is still mounted before calling setState.
       if (mounted) {
         setState(() {
-          lists = Provider.of<EmployeeViewModel>(context, listen: false)
-              .approvals
-              .where((element) => element.immediate_head_status == 0)
-              .toList();
+          lists =
+              Provider.of<EmployeeViewModel>(context, listen: false).approvals;
           _listValue = ListType.Self;
         });
       }
@@ -72,7 +74,7 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
                   children: [
                     Text("Approval for:",
                         style: Theme.of(context).textTheme.titleLarge),
-                    SizedBox(
+                    const SizedBox(
                       width: 20,
                     ),
                     CustomContainer(
@@ -129,13 +131,13 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
                       items: ListType.values.map((ListType type) {
                         return DropdownMenuItem<ListType>(
                           enabled: (type != ListType.Admin ||
-                                  employeeViewModel.profile.isAdmin!) &&
+                                  employeeViewModel.profile!.isAdmin!) &&
                               (type != ListType.PersonInCharge ||
-                                  employeeViewModel.profile.managed_facilities!
+                                  employeeViewModel.profile!.managed_facilities!
                                       .isNotEmpty) &&
                               (type != ListType.ImmediateHead ||
                                   employeeViewModel
-                                      .immediate_head_approvals!.isNotEmpty),
+                                      .immediate_head_approvals.isNotEmpty),
                           value: type,
                           child: Text(
                             Utils.formatEnumString(
@@ -153,145 +155,102 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
                   ],
                 ),
               ),
-              lists == null
-                  ? const Center(child: CircularProgressIndicator())
-                  : ListView(
-                      shrinkWrap: true,
-                      children: lists!.map((item) {
-                        if (approvalViewModel.isLoading ||
-                            employeeViewModel.isLoading) {
-                          return const Center(
-                              child: CircularProgressIndicator());
-                        }
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 32.0, vertical: 12),
-                          child: CustomContainer(
-                            child: ListTile(
-                              title: Column(
-                                // mainAxisAlignment: MainAxisAlignment.start,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    "Slip No. - ${item.slip_number}",
-                                    style: TextStyle(
-                                        fontWeight: FontWeight.w200,
-                                        fontSize: 11,
-                                        color: Colors.deepPurple[400]),
-                                  ),
-                                  Text(
-                                    item.event_details?.event_name ?? "",
-                                    style: TextStyle(
-                                        fontWeight: FontWeight.w700,
-                                        fontSize: 18,
-                                        color: Colors.deepPurple[400]),
-                                  ),
-                                  Text(
-                                    item.event_details?.event_description ?? "",
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.normal,
-                                      fontSize: 12,
-                                    ),
-                                  )
-                                ],
+              if (lists == null)
+                const Center(child: CircularProgressIndicator())
+              else
+                ListView(
+                  shrinkWrap: true,
+                  children: lists!.map((item) {
+                    if (approvalViewModel.isLoading ||
+                        employeeViewModel.isLoading) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 32.0, vertical: 12),
+                      child: CustomContainer(
+                        child: ListTile(
+                          title: Column(
+                            // mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              GestureDetector(
+                                child: Text(
+                                  "Slip No. - ${item.slip_number}",
+                                  style: TextStyle(
+                                      decoration: TextDecoration.underline,
+                                      fontWeight: FontWeight.w200,
+                                      fontSize: 11,
+                                      color: Colors.deepPurple[400]),
+                                ),
+                                onTap: () {
+                                  var args = ReservationScreenArguments(
+                                      slipNo: item.slip_number,
+                                      type: RequestType.Read);
+                                  Navigator.of(context).pushNamed(
+                                      RouteGenerator.reservationScreen,
+                                      arguments: args);
+                                },
                               ),
-                              trailing: _listValue != ListType.Self
-                                  ? Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: <Widget>[
-                                        // Approve button
-                                        TextButton(
-                                          onPressed: () {
-                                            _showConfirmationDialog(
-                                                item.slip_number!, true);
-                                          },
-                                          child: Text('Approve'),
-                                          style: TextButton.styleFrom(
-                                              foregroundColor: Colors.green),
-                                        ),
-                                        // Reject button
-                                        TextButton(
-                                          onPressed: () {
-                                            _showConfirmationDialog(
-                                                item.slip_number!, false);
-                                          },
-                                          child: Text('Reject'),
-                                          style: TextButton.styleFrom(
-                                              foregroundColor: Colors.red),
-                                        ),
-                                      ],
-                                    )
-                                  : const Icon(Icons.remove_red_eye,
-                                      color: kPurpleDark),
-                            ),
+                              Text(
+                                item.event_details?.event_name ?? "",
+                                style: TextStyle(
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 18,
+                                    color: Colors.deepPurple[400]),
+                              ),
+                              Text(
+                                item.event_details?.event_description ?? "",
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.normal,
+                                  fontSize: 12,
+                                ),
+                              )
+                            ],
                           ),
-                        );
-                      }).toList(),
-                    )
-              // ListView.builder(
-              //   shrinkWrap: true,
-              //   itemCount: itemCount,
-              //   itemBuilder: (context, index) {
-              //     return Padding(
-              //       padding: const EdgeInsets.symmetric(
-              //           horizontal: 32.0, vertical: 12),
-              //       child: CustomContainer(
-              //         child: ListTile(
-              //           title: Column(
-              //             // mainAxisAlignment: MainAxisAlignment.start,
-              //             crossAxisAlignment: CrossAxisAlignment.start,
-              //             children: [
-              //               Text(
-              //                 "Slip No. - ${lists[index].slip_number}",
-              //                 style: TextStyle(
-              //                     fontWeight: FontWeight.w200,
-              //                     fontSize: 11,
-              //                     color: Colors.deepPurple[400]),
-              //               ),
-              //               Text(
-              //                 lists[index].event_details?.event_name ??
-              //                     "",
-              //                 style: TextStyle(
-              //                     fontWeight: FontWeight.w700,
-              //                     fontSize: 18,
-              //                     color: Colors.deepPurple[400]),
-              //               ),
-              //               Text(
-              //                 lists[index].event_details?.event_description ??
-              //                     "",
-              //                 style: const TextStyle(
-              //                   fontWeight: FontWeight.normal,
-              //                   fontSize: 12,
-              //                 ),
-              //               )
-              //             ],
-              //           ),
-              //           trailing: Row(
-              //             mainAxisSize: MainAxisSize.min,
-              //             children: <Widget>[
-              //               // Approve button
-              //               TextButton(
-              //                 onPressed: () =>
-              //                     _showConfirmationDialog(index, true),
-              //                 child: Text('Approve'),
-              //                 style: TextButton.styleFrom(
-              //                     foregroundColor: Colors.green),
-              //               ),
-              //               // Reject button
-              //               TextButton(
-              //                 onPressed: () =>
-              //                     _showConfirmationDialog(index, false),
-              //                 child: Text('Reject'),
-              //                 style: TextButton.styleFrom(
-              //                     foregroundColor: Colors.red),
-              //               ),
-              //             ],
-              //           ),
-              //         ),
-              //       ),
-              //     );
-              //   },
-              // ),
+                          trailing: _listValue != ListType.Self
+                              ? Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: <Widget>[
+                                    // Approve button
+                                    TextButton(
+                                      onPressed: () {
+                                        _showConfirmationDialog(
+                                            item.slip_number!, true);
+                                      },
+                                      child: const Text('Approve'),
+                                      style: TextButton.styleFrom(
+                                          foregroundColor: Colors.green),
+                                    ),
+                                    // Reject button
+                                    TextButton(
+                                      onPressed: () {
+                                        _showConfirmationDialog(
+                                            item.slip_number!, false);
+                                      },
+                                      child: const Text('Reject'),
+                                      style: TextButton.styleFrom(
+                                          foregroundColor: Colors.red),
+                                    ),
+                                  ],
+                                )
+                              : IconButton(
+                              onPressed: () {
+
+                                // final pdfFile = await PDFService.generatePDFTest();
+                                // PdfApi.openFile(pdfFile);
+                                var args = ReservationScreenArguments(slipNo: item.slip_number,type: RequestType.Update);
+                                Navigator.of(context)
+                                    .pushNamed(RouteGenerator.reservationScreen, arguments: args);
+
+                              },
+                              icon: const Icon(Icons.remove_red_eye,
+                                  color: kPurpleDark)),
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                )
             ],
           ),
         );
@@ -305,7 +264,7 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
         mobileBody: body(),
         desktopBody: body(),
         currentRoute: ApprovalScreen.screen_id,
-        title: "Event List");
+        title: "Approval List");
   }
 
   void _showConfirmationDialog(String slipNo, bool approved) {
@@ -315,62 +274,127 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
         return Consumer<ApprovalViewModel>(
             builder: (context, approvalViewModel, child) {
           return AlertDialog(
-            title: Text('Confirm'),
+            title: const Text('Confirm'),
             content: Text(
                 'Are you sure you want to ${approved ? "approve" : "reject"} this item?'),
             actions: <Widget>[
               TextButton(
                 onPressed: () async {
                   Navigator.of(context).pop(); // Close the dialog
-                  switch (_listValue) {
-                    case null:
-                      // TODO: Handle this case.
-                      break;
-                    case ListType.Self:
-                      // TODO: Handle this case.
-                      break;
-                    case ListType.ImmediateHead:
-                      // TODO: Handle this case.
-                      await approvalViewModel.approveByHead(slipNo);
-                      break;
-                    case ListType.PersonInCharge:
-                      // TODO: Handle this case.
-                      await approvalViewModel.approveByPIC(slipNo);
-                      break;
-                    case ListType.Admin:
-                      // TODO: Handle this case.
-                      await approvalViewModel.approveAdmin(slipNo);
-                      break;
+                  if (approved) {
+                    switch (_listValue) {
+                      case null:
+                        // TODO: Handle this case.
+                        break;
+                      case ListType.Self:
+                        // TODO: Handle this case.
+                        break;
+                      case ListType.ImmediateHead:
+                        // TODO: Handle this case.
+                        if (await approvalViewModel.approveByHead(slipNo)) {
+                          await Provider.of<EmployeeViewModel>(context,
+                                  listen: false)
+                              .fetchProfile();
+                          setState(() {
+                            _listValue = ListType.Self;
+                            lists = Provider.of<EmployeeViewModel>(context,
+                                    listen: false)
+                                .approvals;
+                          });
+                        }
+                        break;
+                      case ListType.PersonInCharge:
+                        // TODO: Handle this case.
+                        if (await approvalViewModel.approveByPIC(slipNo)) {
+                          await Provider.of<EmployeeViewModel>(context,
+                                  listen: false)
+                              .fetchProfile();
+                          setState(() {
+                            _listValue = ListType.Self;
+                            lists = Provider.of<EmployeeViewModel>(context,
+                                    listen: false)
+                                .approvals;
+                          });
+                        }
+                        break;
+                      case ListType.Admin:
+                        // TODO: Handle this case.
+                        if (await approvalViewModel.approveAdmin(slipNo)) {
+                          await Provider.of<EmployeeViewModel>(context,
+                                  listen: false)
+                              .fetchProfile();
+                          setState(() {
+                            _listValue = ListType.Self;
+                            lists = Provider.of<EmployeeViewModel>(context,
+                                    listen: false)
+                                .approvals;
+                          });
+                        }
+                        break;
+                    }
+                  } else {
+                    switch (_listValue) {
+                      case null:
+                        // TODO: Handle this case.
+                        break;
+                      case ListType.Self:
+                        // TODO: Handle this case.
+                        break;
+                      case ListType.ImmediateHead:
+                        // TODO: Handle this case.
+                        print("rejecting");
+                        if (await approvalViewModel.rejectByHead(slipNo)) {
+                          await Provider.of<EmployeeViewModel>(context,
+                                  listen: false)
+                              .fetchProfile();
+                          setState(() {
+                            _listValue = ListType.Self;
+                            lists = Provider.of<EmployeeViewModel>(context,
+                                    listen: false)
+                                .approvals;
+                          });
+                        }
+                        break;
+                      case ListType.PersonInCharge:
+                        // TODO: Handle this case.
+                        if (await approvalViewModel.rejectByPIC(slipNo)) {
+                          await Provider.of<EmployeeViewModel>(context,
+                                  listen: false)
+                              .fetchProfile();
+                          setState(() {
+                            _listValue = ListType.Self;
+                            lists = Provider.of<EmployeeViewModel>(context,
+                                    listen: false)
+                                .approvals;
+                          });
+                        }
+                        break;
+                      case ListType.Admin:
+                        // TODO: Handle this case.
+                        if (await approvalViewModel.rejectAdmin(slipNo)) {
+                          await Provider.of<EmployeeViewModel>(context,
+                                  listen: false)
+                              .fetchProfile();
+                          setState(() {
+                            _listValue = ListType.Self;
+                            lists = Provider.of<EmployeeViewModel>(context,
+                                    listen: false)
+                                .approvals;
+                          });
+                        }
+                        break;
+                    }
                   }
-                  // _approveItem(index, approved);
+                  Navigator.of(context)
+                      .popAndPushNamed(ApprovalScreen.screen_id);
                 },
-                child: Text('Yes'),
+                child: const Text('Yes'),
               ),
               TextButton(
                 onPressed: () async {
                   Navigator.of(context).pop(); // Close the dialog
-                  switch (_listValue) {
-                    case null:
-                      // TODO: Handle this case.
-                      break;
-                    case ListType.Self:
-                      // TODO: Handle this case.
-                      break;
-                    case ListType.ImmediateHead:
-                      // TODO: Handle this case.
-                      await approvalViewModel.rejectByHead(slipNo);
-                      break;
-                    case ListType.PersonInCharge:
-                      // TODO: Handle this case.
-                      await approvalViewModel.rejectByPIC(slipNo);
-                      break;
-                    case ListType.Admin:
-                      // TODO: Handle this case.
-                      await approvalViewModel.rejectAdmin(slipNo);
-                      break;
-                  }
                 },
-                child: Text('No'),
+                child: const Text('No'),
               ),
             ],
           );
@@ -378,5 +402,4 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
       },
     );
   }
-
 }

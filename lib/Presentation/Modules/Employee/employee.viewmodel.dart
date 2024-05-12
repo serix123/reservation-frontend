@@ -1,11 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:online_reservation/Data/API_Services/employee.service.dart';
 import 'package:online_reservation/Data/Models/approval.model.dart';
-import 'package:online_reservation/Data/Models/approval.model.dart';
-import 'package:online_reservation/Data/Models/approval.model.dart';
-import 'package:online_reservation/Data/Models/approval.model.dart';
-import 'package:online_reservation/Data/Models/approval.model.dart';
-import 'package:online_reservation/Data/Models/approval.model.dart';
 import 'package:online_reservation/Data/Models/employee.model.dart';
 
 class EmployeeViewModel extends ChangeNotifier {
@@ -23,7 +18,7 @@ class EmployeeViewModel extends ChangeNotifier {
   // Employee _profile = Employee(id: 1, firstName: "firstName", lastName: "lastName", isAdmin: false);
   Employee?
       _profile; // Now it's nullable and won't throw LateInitializationError
-  Employee get profile => _profile!;
+  Employee? get profile => _profile;
 
   EmployeeViewModel() {
     // init();

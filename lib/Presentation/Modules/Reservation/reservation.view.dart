@@ -1,12 +1,11 @@
-import 'dart:convert';
-import 'dart:io';
 import 'dart:typed_data';
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:collection/collection.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:online_reservation/Presentation/Modules/Event/event.viewmodel.dart';
 import 'package:online_reservation/Presentation/Modules/Event/eventList.view.dart';
 import 'package:online_reservation/Utils/utils.dart';
+import 'package:online_reservation/config/app.color.dart';
 import 'package:provider/provider.dart';
 
 import 'package:online_reservation/Data/Models/event.model.dart';
@@ -19,16 +18,26 @@ import 'package:online_reservation/Presentation/Modules/Reservation/reservation.
 import 'package:online_reservation/Presentation/Modules/Widgets/responsiveLayout.widget.dart';
 import 'package:online_reservation/Presentation/Modules/Widgets/customPurpleContainer.widget.dart';
 
+class ReservationScreenArguments {
+  final String? slipNo;
+  final RequestType? type;
+
+  ReservationScreenArguments({this.slipNo, this.type});
+}
+
 class ReservationScreen extends StatefulWidget {
   static const screen_id = "/reservation";
+  final ReservationScreenArguments? args;
 
-  const ReservationScreen({super.key});
+  const ReservationScreen({super.key, this.args});
   @override
   State<ReservationScreen> createState() => _ReservationScreenState();
 }
 
 class _ReservationScreenState extends State<ReservationScreen> {
   final _formKey = GlobalKey<FormState>();
+  late bool enabled;
+
   late Event event;
 
   String? _statusValue = 'draft';
@@ -40,11 +49,10 @@ class _ReservationScreenState extends State<ReservationScreen> {
   late TextEditingController _participantNumberController;
   late TextEditingController _quantityController;
   late TextEditingController _additionalRequirementsController;
-  File? _pickedFile;
 
   DateTime _selectedStartDate = DateTime.now();
   DateTime _selectedEndDate = DateTime.now()
-      .add(const Duration(hours: 1)); // Default end time is 1 hour later
+      .add(new Duration(days: 7)); // Default end time is 1 hour later
   TimeOfDay _selectedStartTime = TimeOfDay.now();
   TimeOfDay _selectedEndTime =
       TimeOfDay(hour: TimeOfDay.now().hour + 1, minute: TimeOfDay.now().minute);
@@ -113,12 +121,35 @@ class _ReservationScreenState extends State<ReservationScreen> {
     });
   }
 
+  void _pickStartEndTime() async {
+    final TimeOfDay? startTime = await showTimePicker(
+      initialEntryMode: TimePickerEntryMode.inputOnly,
+      helpText: "Select Start Time",
+      context: context,
+      initialTime: _selectedStartTime,
+    );
+    if (startTime == null) return;
+
+    final TimeOfDay? endTime = await showTimePicker(
+      initialEntryMode: TimePickerEntryMode.inputOnly,
+      helpText: "Select End Time",
+      context: context,
+      initialTime: _selectedEndTime,
+    );
+    if (endTime == null) return; // User canceled the picker
+
+    setState(() {
+      _selectedStartTime = startTime;
+      _selectedEndTime = endTime;
+    });
+  }
+
   void _pickStartDate() async {
     final DateTime? startDate = await showDatePicker(
       context: context,
       initialDate: _selectedStartDate,
       firstDate: DateTime.now(),
-      lastDate: DateTime(2100),
+      lastDate: DateTime(2050),
     );
     if (startDate == null) return; // User canceled the picker
 
@@ -130,15 +161,33 @@ class _ReservationScreenState extends State<ReservationScreen> {
   void _pickEndDate() async {
     final DateTime? endDate = await showDatePicker(
       // helpText: "Select End Date",
+
       context: context,
       initialDate: _selectedEndDate,
-      firstDate: _selectedStartDate,
-      lastDate: DateTime(2100),
+      firstDate: DateTime(2015),
+      lastDate: DateTime(2050),
     );
     if (endDate == null) return; // User canceled the picker
 
     setState(() {
       _selectedEndDate = endDate;
+    });
+  }
+
+  void _pickStartEndDate() async {
+    final DateTime? startEndDate = await showDatePicker(
+      // helpText: "Select End Date",
+
+      context: context,
+      initialDate: _selectedStartDate,
+      firstDate: DateTime(2015),
+      lastDate: DateTime(2050),
+    );
+    if (startEndDate == null) return; // User canceled the picker
+
+    setState(() {
+      _selectedStartDate = startEndDate;
+      _selectedEndDate = startEndDate;
     });
   }
 
@@ -167,40 +216,97 @@ class _ReservationScreenState extends State<ReservationScreen> {
     );
   }
 
-  @override
-  void initState() {
-    super.initState();
-    Future.microtask(() =>
+  Future<void> initData() async {
+    var getEventFuture = widget.args?.slipNo != null
+        ? Provider.of<EventViewModel>(context, listen: false)
+            .fetchEvent(widget.args!.slipNo!)
+        : Future.value(null);
+    try {
+      // Gather all asynchronous operations.
+      await Future.wait([
         Provider.of<EquipmentViewModel>(context, listen: false)
-            .fetchEquipment());
-    Future.microtask(() =>
+            .fetchEquipment(),
+        Provider.of<FacilityViewModel>(context, listen: false)
+            .fetchFacilities(),
         Provider.of<AuthenticationViewModel>(context, listen: false)
-            .refreshAccessToken());
-    _requesitionerController = TextEditingController();
-    _departmentController = TextEditingController();
-    Future.microtask(() =>
+            .refreshAccessToken(),
         Provider.of<EmployeeViewModel>(context, listen: false)
             .fetchProfile()
             .then((_) {
           _requesitionerController.text =
-              "${Provider.of<EmployeeViewModel>(context, listen: false).profile.firstName} ${Provider.of<EmployeeViewModel>(context, listen: false).profile.lastName}";
+              "${Provider.of<EmployeeViewModel>(context, listen: false).profile?.firstName ?? ""} ${Provider.of<EmployeeViewModel>(context, listen: false).profile?.lastName}";
           _departmentController.text =
               Provider.of<EmployeeViewModel>(context, listen: false)
-                  .profile
-                  .departmentDetails!
-                  .name;
-        }));
+                      .profile
+                      ?.departmentDetails
+                      ?.name ??
+                  "";
+        }),
+        getEventFuture,
+      ]);
+
+      // Use a short delay to simulate a network call (if needed).
+      await Future.delayed(const Duration(seconds: 1));
+
+      // Check if the widget is still mounted before calling setState.
+      if (mounted) {
+        setState(() {
+          if (widget.args?.slipNo != null) {
+            event =
+                Provider.of<EventViewModel>(context, listen: false).userEvent!;
+            _contactNoController.text = event.contact_number!;
+            _eventNameController.text = event.event_name!;
+            _eventDescriptionController.text = event.event_description!;
+            _participantNumberController.text =
+                event.participants_quantity!.toString();
+            _additionalRequirementsController.text =
+                event.additional_needs ?? "";
+            _selectedStartDate = Utils.extractDateOnly(event.start_time);
+            _selectedEndDate = Utils.extractDateOnly(event.end_time);
+            _selectedStartTime = Utils.extractTimeOnly(event.start_time);
+            _selectedEndTime = Utils.extractTimeOnly(event.end_time);
+            selectedFacility =
+                Provider.of<FacilityViewModel>(context, listen: false)
+                    .facilities
+                    .firstWhereOrNull(
+                        (facility) => facility.id == event.reserved_facility);
+            addedEquipments = event.equipments ?? [];
+            _fileName = event.file?.split('/').last;
+          } else {
+            event = Event(
+                event_name: "test",
+                start_time: Utils.combineDateTime(
+                    _selectedStartDate, _selectedStartTime),
+                end_time:
+                    Utils.combineDateTime(_selectedEndDate, _selectedEndTime));
+          }
+        });
+      }
+    } catch (error) {
+      // Handle or log errors
+      print('Error fetching data: $error');
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _requesitionerController = TextEditingController();
+    _departmentController = TextEditingController();
     _contactNoController = TextEditingController();
     _eventNameController = TextEditingController();
     _eventDescriptionController = TextEditingController();
     _participantNumberController = TextEditingController();
     _additionalRequirementsController = TextEditingController();
     _quantityController = TextEditingController();
-    event = Event(
-        event_name: "test",
-        start_time:
-            Utils.combineDateTime(_selectedStartDate, _selectedStartTime),
-        end_time: Utils.combineDateTime(_selectedEndDate, _selectedEndTime));
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      initData();
+    });
+    Future.microtask(
+        () async => _fileBytes = await Utils.downloadFile(event.file!));
+    enabled =
+        // widget.args?.slipNo != null &&
+        widget.args?.type == RequestType.Read ? false : true;
   }
 
   @override
@@ -237,9 +343,8 @@ class _ReservationScreenState extends State<ReservationScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (eventViewModel.isRegistered)
-                    Text("Requesitioner Details",
-                        style: Theme.of(context).textTheme.titleLarge),
+                  Text("Requesitioner Details",
+                      style: Theme.of(context).textTheme.titleLarge),
                   Row(
                     children: [
                       Expanded(
@@ -278,6 +383,7 @@ class _ReservationScreenState extends State<ReservationScreen> {
                     ],
                   ),
                   TextFormField(
+                    enabled: enabled,
                     maxLength: 11,
                     controller: _contactNoController,
                     decoration: const InputDecoration(
@@ -307,11 +413,13 @@ class _ReservationScreenState extends State<ReservationScreen> {
                       CustomContainer(
                           child: DropdownButton<String>(
                         value: _statusValue,
-                        onChanged: (String? newValue) {
-                          setState(() {
-                            _statusValue = newValue;
-                          });
-                        },
+                        onChanged: enabled
+                            ? (String? newValue) {
+                                setState(() {
+                                  _statusValue = newValue;
+                                });
+                              }
+                            : null,
                         items: <String>['draft', 'application']
                             .map<DropdownMenuItem<String>>((String value) {
                           return DropdownMenuItem<String>(
@@ -331,6 +439,7 @@ class _ReservationScreenState extends State<ReservationScreen> {
                     ],
                   ),
                   TextFormField(
+                    enabled: enabled,
                     controller: _eventNameController,
                     decoration: const InputDecoration(
                       labelText: 'Event Name',
@@ -344,6 +453,7 @@ class _ReservationScreenState extends State<ReservationScreen> {
                     },
                   ),
                   TextFormField(
+                    enabled: enabled,
                     controller: _eventDescriptionController,
                     decoration: const InputDecoration(
                       labelText: 'Event Description',
@@ -357,6 +467,7 @@ class _ReservationScreenState extends State<ReservationScreen> {
                     },
                   ),
                   TextFormField(
+                    enabled: enabled,
                     controller: _participantNumberController,
                     decoration: const InputDecoration(
                       labelText: 'Number of Participants',
@@ -381,7 +492,7 @@ class _ReservationScreenState extends State<ReservationScreen> {
                       style: Theme.of(context).textTheme.titleLarge),
                   const SizedBox(height: 20),
                   ElevatedButton(
-                    onPressed: _showFacilityPicker,
+                    onPressed: enabled ? _showFacilityPicker : null,
                     child: Text(selectedFacility == null
                         ? 'Select Facility'
                         : 'Facility: ${selectedFacility!.name}'),
@@ -395,7 +506,7 @@ class _ReservationScreenState extends State<ReservationScreen> {
                   Row(
                     children: [
                       ElevatedButton(
-                        onPressed: _pickFile,
+                        onPressed: enabled ? _pickFile : null,
                         child: const Text('Upload File'),
                       ),
                       const SizedBox(width: 20),
@@ -407,7 +518,8 @@ class _ReservationScreenState extends State<ReservationScreen> {
                       const SizedBox(height: 20),
                       // if (_fileBytes != null)
                       //   Image.memory(_fileBytes!, height: 200, errorBuilder: (context, error, stackTrace) => Text("Failed to load image")),
-                      if (_fileName != null) Text('File name: $_fileName'),
+                      if (_fileName != null)
+                        Expanded(child: Text('File name: $_fileName')),
                     ],
                   ),
                   const SizedBox(height: 20),
@@ -417,44 +529,46 @@ class _ReservationScreenState extends State<ReservationScreen> {
                     children: [
                       Expanded(
                         child: ListTile(
-                          title: const Text("Select Start Date"),
+                          enabled: enabled,
+                          title: const Text("Select Date"),
                           subtitle: Text(_selectedStartDate
                               .toLocal()
                               .toString()
                               .split(' ')[0]),
-                          onTap: _pickStartDate,
+                          onTap: _pickStartEndDate,
                         ),
                       ),
                       Expanded(
                         child: ListTile(
-                          title: const Text("Select End Date"),
-                          subtitle: Text(_selectedEndDate
-                              .toLocal()
-                              .toString()
-                              .split(' ')[0]),
-                          onTap: _pickEndDate,
+                          enabled: enabled,
+                          title: const Text("Select Time Slot"),
+                          subtitle: Text(
+                              "${_selectedStartTime.format(context)} - ${_selectedEndTime.format(context)}"),
+                          onTap: _pickStartEndTime,
                         ),
                       ),
                     ],
                   ),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: ListTile(
-                          title: const Text("Select Start Time"),
-                          subtitle: Text(_selectedStartTime.format(context)),
-                          onTap: _pickStartTime,
-                        ),
-                      ),
-                      Expanded(
-                        child: ListTile(
-                          title: const Text("Select End Time"),
-                          subtitle: Text(_selectedEndTime.format(context)),
-                          onTap: _pickEndTime,
-                        ),
-                      ),
-                    ],
-                  ),
+                  // Row(
+                  //   children: [
+                  //     Expanded(
+                  //       child: ListTile(
+                  //         enabled: enabled,
+                  //         title: const Text("Select Start Time"),
+                  //         subtitle: Text(_selectedStartTime.format(context)),
+                  //         onTap: _pickStartTime,
+                  //       ),
+                  //     ),
+                  //     Expanded(
+                  //       child: ListTile(
+                  //         enabled: enabled,
+                  //         title: const Text("Select End Time"),
+                  //         subtitle: Text(_selectedEndTime.format(context)),
+                  //         onTap: _pickEndTime,
+                  //       ),
+                  //     ),
+                  //   ],
+                  // ),
                   const SizedBox(height: 20),
                   Text("Materials & Personnel",
                       style: Theme.of(context).textTheme.titleLarge),
@@ -494,12 +608,14 @@ class _ReservationScreenState extends State<ReservationScreen> {
                                 child: DropdownButton<Equipment>(
                               isExpanded: true,
                               value: selectedEquipment,
-                              onChanged: (Equipment? newValue) {
-                                setState(() {
-                                  selectedEquipment = newValue;
-                                  _quantityController.clear();
-                                });
-                              },
+                              onChanged: enabled
+                                  ? (Equipment? newValue) {
+                                      setState(() {
+                                        selectedEquipment = newValue;
+                                        _quantityController.clear();
+                                      });
+                                    }
+                                  : null,
                               items: equipmentViewModel.equipments
                                   .map<DropdownMenuItem<Equipment>>(
                                       (Equipment equipment) {
@@ -527,6 +643,7 @@ class _ReservationScreenState extends State<ReservationScreen> {
                           // SizedBox(width: 20),
                           Expanded(
                             child: TextFormField(
+                              enabled: enabled,
                               controller: _quantityController,
                               decoration: const InputDecoration(
                                 labelText: 'Quantity',
@@ -538,19 +655,33 @@ class _ReservationScreenState extends State<ReservationScreen> {
                           SizedBox(
                             width: 100,
                             child: ElevatedButton(
-                              onPressed: () {
-                                if (selectedEquipment != null &&
-                                    _quantityController.text.isNotEmpty) {
-                                  setState(() {
-                                    addedEquipments.add(EventEquipment(
-                                        equipment: selectedEquipment!.id,
-                                        equipment_name:
-                                            selectedEquipment!.equipment_name,
-                                        quantity: int.parse(
-                                            _quantityController.text)));
-                                  });
-                                }
-                              },
+                              onPressed: enabled
+                                  ? () {
+                                      if (selectedEquipment != null &&
+                                          _quantityController.text.isNotEmpty) {
+                                        if (int.parse(
+                                                _quantityController.text) >
+                                            selectedEquipment!
+                                                .equipment_quantity) {
+                                          return;
+                                        }
+                                        if (!addedEquipments.any((equipment) =>
+                                            equipment.equipment ==
+                                            selectedEquipment!.id)) {
+                                          setState(() {
+                                            addedEquipments.add(EventEquipment(
+                                                equipment:
+                                                    selectedEquipment!.id,
+                                                equipment_name:
+                                                    selectedEquipment!
+                                                        .equipment_name,
+                                                quantity: int.parse(
+                                                    _quantityController.text)));
+                                          });
+                                        }
+                                      }
+                                    }
+                                  : null,
                               child: const Text('Add'),
                             ),
                           ),
@@ -565,10 +696,28 @@ class _ReservationScreenState extends State<ReservationScreen> {
                               itemCount: addedEquipments.length,
                               itemBuilder: (context, index) {
                                 return ListTile(
+                                  enabled: enabled,
+                                  onTap: () {
+                                    // setState(() {
+                                    //
+                                    // });
+                                  },
                                   title: Text(
                                       addedEquipments[index].equipment_name),
                                   subtitle: Text(
                                       'Quantity: ${addedEquipments[index].quantity}'),
+                                  trailing: IconButton(
+                                    icon: const Icon(Icons.delete,
+                                        color: Colors.red),
+                                    onPressed: enabled
+                                        ? () {
+                                            // Action to perform on button press
+                                            setState(() {
+                                              addedEquipments.removeAt(index);
+                                            });
+                                          }
+                                        : null,
+                                  ),
                                 );
                               },
                             ),
@@ -582,6 +731,7 @@ class _ReservationScreenState extends State<ReservationScreen> {
                       style: Theme.of(context).textTheme.titleLarge),
                   // Add more form fields for additional information as needed
                   TextFormField(
+                    enabled: enabled,
                     controller: _additionalRequirementsController,
                     decoration: const InputDecoration(
                       labelText: 'Special Requirements',
@@ -589,16 +739,63 @@ class _ReservationScreenState extends State<ReservationScreen> {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        // Process the reservation
-                        print("Processing reservation...");
-                        _showConfirmationDialog();
-                      }
-                    },
-                    child: const Text('Submit Reservation'),
-                  ),
+                  if (enabled)
+                    if (widget.args?.slipNo == null)
+                      ElevatedButton(
+                        onPressed: () {
+                          if (_formKey.currentState!.validate()) {
+                            // Process the reservation
+                            print("Processing reservation...");
+                            _showConfirmationDialog(RequestType.Create);
+                          }
+                        },
+                        child: const Text('Submit Reservation'),
+                      )
+                    else
+                      Row(
+                        children: [
+                          ElevatedButton(
+                            onPressed: () {
+                              if (_formKey.currentState!.validate()) {
+                                // Process the reservation
+                                print("Processing reservation...");
+                                _showConfirmationDialog(RequestType.Update);
+                              }
+                            },
+                            child: const Text('Update Reservation'),
+                          ),
+                          const SizedBox(
+                            width: 50,
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              if (_formKey.currentState!.validate()) {
+                                // Process the reservation
+                                print("Processing reservation...");
+                                _showConfirmationDialog(RequestType.Delete);
+                              }
+                            },
+                            style: ButtonStyle(
+                              backgroundColor:
+                                  MaterialStateProperty.resolveWith<Color>(
+                                (Set<MaterialState> states) {
+                                  if (states.contains(MaterialState.pressed)) {
+                                    return Colors.red[
+                                        700]!; // Background color when pressed
+                                  }
+                                  return Colors.red; // Default background color
+                                },
+                              ),
+                              overlayColor: MaterialStateProperty.all(
+                                  Colors.red[200]), // Splash color on press
+                            ),
+                            child: const Text(
+                              "Delete Reservation",
+                              style: TextStyle(color: kBackgroundGrey),
+                            ),
+                          ),
+                        ],
+                      ),
                 ],
               ),
             ),
@@ -618,7 +815,34 @@ class _ReservationScreenState extends State<ReservationScreen> {
     });
   }
 
-  void _showConfirmationDialog() {
+  void _showDeleteDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Confirm"),
+          content: const Text("Are you sure you want to delete?"),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text("Cancel"),
+            ),
+            TextButton(
+              onPressed: () {
+                // Perform delete operation
+                Navigator.of(context).pop();
+                print("Item deleted");
+              },
+              child: const Text("Delete"),
+              style: TextButton.styleFrom(foregroundColor: Colors.red),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showConfirmationDialog(RequestType type) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -626,7 +850,8 @@ class _ReservationScreenState extends State<ReservationScreen> {
             builder: (context, eventViewModel, child) {
           return AlertDialog(
             title: const Text('Confirm'),
-            content: const Text('Are you sure you want to make reservation?'),
+            content: Text(
+                'Are you sure you want to ${Utils.formatEnumString(type.toString().split('.').last)} reservation?'),
             actions: <Widget>[
               TextButton(
                 onPressed: () async {
@@ -649,48 +874,72 @@ class _ReservationScreenState extends State<ReservationScreen> {
                     event.fileUpload = _fileBytes;
                     event.fileName = _fileName;
                   });
-                  bool success = await eventViewModel.registerEvent(event);
-                  if (success) {
-                    showDialog(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return AlertDialog(
-                          title: const Text('Confirmed'),
-                          content: const Text('Reservation is made'),
-                          actions: <Widget>[
-                            TextButton(
-                              onPressed: () {
-                                Navigator.of(context).pop(); // Close the dialog
-                                Navigator.of(context)
-                                    .popAndPushNamed(EventListScreen.screen_id);
-                              },
-                              child: const Text('OK'),
-                            ),
-                          ],
-                        );
-                      },
-                    );
+                  bool success;
+
+                  switch (type) {
+                    case RequestType.Create:
+                      // TODO: Handle this case.
+                      success = await eventViewModel.registerEvent(event);
+                      break;
+                    case RequestType.Update:
+                      // TODO: Handle this case.
+                      success = await eventViewModel.updateEvent(event);
+                      break;
+                    case RequestType.Delete:
+                      // TODO: Handle this case.
+                      success = false;
+                      break;
+                    case RequestType.Read:
+                      // TODO: Handle this case.
+                      success = false;
+                      break;
                   }
-                  else{
-                    showDialog(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return AlertDialog(
-                          title: const Text('Error'),
-                          content: const Text('Reservation is fail'),
-                          actions: <Widget>[
-                            TextButton(
-                              onPressed: () {
-                                Navigator.of(context).pop(); // Close the dialog
-                                Navigator.of(context)
-                                    .popAndPushNamed(EventListScreen.screen_id);
-                              },
-                              child: const Text('OK'),
-                            ),
-                          ],
-                        );
-                      },
-                    );
+                  if (mounted) {
+                    if (success) {
+                      Navigator.of(context).pop();
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: const Text('Confirmed'),
+                            content: const Text('Reservation is made'),
+                            actions: <Widget>[
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.of(context)
+                                      .pop(); // Close the dialog
+                                  Navigator.of(context).popAndPushNamed(
+                                      EventListScreen.screen_id);
+                                },
+                                child: const Text('OK'),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                    } else {
+                      Navigator.of(context).pop();
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: const Text('Error'),
+                            content: const Text('Reservation failed'),
+                            actions: <Widget>[
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.of(context)
+                                      .pop(); // Close the dialog
+                                  Navigator.of(context).popAndPushNamed(
+                                      EventListScreen.screen_id);
+                                },
+                                child: const Text('OK'),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                    }
                   }
                 },
                 child: const Text('Yes'),
@@ -718,3 +967,5 @@ class _ReservationScreenState extends State<ReservationScreen> {
     );
   }
 }
+
+enum RequestType { Create, Update, Delete, Read }

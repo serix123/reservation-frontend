@@ -1,5 +1,3 @@
-import 'dart:html';
-
 import 'package:online_reservation/Data/Models/event.model.dart';
 
 class Approval {

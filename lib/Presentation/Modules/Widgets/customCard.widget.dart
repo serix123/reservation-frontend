@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:online_reservation/config/app.color.dart';
 
 
 class CustomCard extends StatelessWidget {

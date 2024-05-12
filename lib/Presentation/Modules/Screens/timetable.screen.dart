@@ -13,8 +13,6 @@ class _TimetableScreenState extends State<TimetableScreen> {
   final ScrollController _scrollController = ScrollController();
 
   Map<String, TimeRange> selectedTimes = {}; // Stores time range for each employee
-  TimeOfDay? _startTime;
-  TimeOfDay? _endTime;
   String? _selectedEmployee; // Track the selected employee
 
   @override
@@ -33,8 +31,6 @@ class _TimetableScreenState extends State<TimetableScreen> {
             onPressed: () {
               setState(() {
                 _selectedEmployee = null;
-                _startTime = null;
-                _endTime = null;
               });
             },
           ),
@@ -79,8 +75,6 @@ class _TimetableScreenState extends State<TimetableScreen> {
                     onTap: () {
                       setState(() {
                         _selectedEmployee = name;
-                        _startTime = null;
-                        _endTime = null;
                       });
                     },
                     child: Container(

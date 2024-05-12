@@ -24,7 +24,7 @@ class ApiService {
     }
   }
 
-  Future<Employee> fetchProfile() async {
+  Future<Employee?> fetchProfile() async {
     try {
       String? token = await storage.read(key: "access");
       final response = await http.get(
@@ -41,7 +41,8 @@ class ApiService {
         throw Exception('Failed to load employees');
       }
     } catch (e) {
-      throw Exception('Failed to load employees: $e');
+      print('error: $e');
     }
+    return null;
   }
 }

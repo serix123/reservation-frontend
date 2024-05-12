@@ -4,13 +4,22 @@ import 'package:online_reservation/Presentation/Modules/Authentication/auth.view
 import 'package:online_reservation/Presentation/Modules/Employee/employee.viewmodel.dart';
 import 'package:online_reservation/Presentation/Modules/Event/event.viewmodel.dart';
 import 'package:online_reservation/Presentation/Modules/Facility/facilityList.viewmodel.dart';
+import 'package:online_reservation/Presentation/Modules/Notifications/notification.viewmodel.dart';
 import 'package:online_reservation/Presentation/Modules/Reservation/reservation.viewmodel.dart';
 import 'package:online_reservation/Presentation/Modules/Widgets/responsiveLayout.widget.dart';
 import 'package:online_reservation/Presentation/route/route.generator.dart';
 import 'package:provider/provider.dart';
+import 'package:path_provider/path_provider.dart' ;
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await initPathProvider();
   runApp(const MyApp());
+}
+
+Future<void> initPathProvider() async {
+  // Get the application documents directory
+  await getApplicationDocumentsDirectory();
 }
 
 class MyApp extends StatelessWidget {
@@ -27,6 +36,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (context) => EquipmentViewModel()),
         ChangeNotifierProvider(create: (context) => EventViewModel()),
         ChangeNotifierProvider(create: (context) => ApprovalViewModel()),
+        ChangeNotifierProvider(create: (context) => NotificationViewModel()),
       ],
       builder: (context, child) {
         return MaterialApp(
@@ -64,7 +74,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    Provider.of<EmployeeViewModel>(context,listen: false).fetchProfile();
+    Provider.of<EmployeeViewModel>(context, listen: false).fetchProfile();
     return ResponsiveLayout(
       mobileBody: ListView(
         children: <Widget>[

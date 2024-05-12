@@ -37,6 +37,14 @@ dependencies:
   flutter_secure_storage: ^9.0.0
   table_calendar: ^3.0.5
   file_picker: ^5.0.0
+    # create pdf document
+  pdf: ^3.1.0
+
+  # save file
+  path_provider: ^2.0.1
+
+  # open pdf document
+  open_file: ^3.1.0
 
 
   # The following adds the Cupertino Icons font to your application.
@@ -82,6 +90,10 @@ flutter:
   # list giving the asset and other descriptors for the font. For
   # example:
   # fonts:
+  fonts:
+    - family: Montserrat
+      fonts:
+        - asset: assets/opensans.ttf
   #   - family: Schyler
   #     fonts:
   #       - asset: fonts/Schyler-Regular.ttf

@@ -1,8 +1,8 @@
 import 'package:http/http.dart' as http;
-import 'package:online_reservation/Data/Models/facility.model.dart';
 import 'dart:convert';
-
+import 'package:online_reservation/Data/Models/facility.model.dart';
 import 'package:online_reservation/config/host.dart';
+
 
 
 class FacilityAPIService {
@@ -15,10 +15,11 @@ class FacilityAPIService {
         List<Facility> facilities = body.map((dynamic item) => Facility.fromJson(item)).toList();
         return facilities;
       } else {
-        throw Exception('Failed to load employees');
+        throw Exception('Failed to load Facilities');
       }
     } catch (e) {
-      throw Exception('Failed to load employees: $e');
+      print('$e');
+      return [];
     }
   }
 }

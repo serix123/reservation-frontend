@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:online_reservation/Presentation/Modules/Notifications/notificationList.view.dart';
 
 import 'package:online_reservation/Presentation/route/route.generator.dart';
 import 'navigationDrawer.widget.dart';
@@ -40,13 +41,7 @@ class ResponsiveLayout extends StatelessWidget {
                       .pushNamed(RouteGenerator.profileScreen),
                   isSelected: currentRoute == RouteGenerator.profileScreen,
                 ),
-                IconButton(
-                  icon: const Icon(Icons.notifications),
-                  onPressed: () {
-                    // Handle notification icon press
-                    print("Notifications pressed");
-                  },
-                ),
+                NotificationPopupMenu()
               ],
             ),
             drawer: CustomNavigationDrawer(
@@ -73,13 +68,7 @@ class ResponsiveLayout extends StatelessWidget {
                         isSelected:
                             currentRoute == RouteGenerator.profileScreen,
                       ),
-                      IconButton(
-                        icon: const Icon(Icons.notifications),
-                        onPressed: () {
-                          // Handle notification icon press
-                          print("Notifications pressed");
-                        },
-                      ),
+                      NotificationPopupMenu()
                     ],
                   ),
                   body: desktopBody,

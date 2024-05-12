@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:online_reservation/Presentation/Modules/Approval/approvalList.viewmodel.dart';
 import 'package:online_reservation/Presentation/Modules/Authentication/auth.viewmodel.dart';
@@ -9,11 +10,13 @@ import 'package:online_reservation/Presentation/Modules/Reservation/reservation.
 import 'package:online_reservation/Presentation/Modules/Widgets/responsiveLayout.widget.dart';
 import 'package:online_reservation/Presentation/route/route.generator.dart';
 import 'package:provider/provider.dart';
-import 'package:path_provider/path_provider.dart' ;
+import 'package:path_provider/path_provider.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await initPathProvider();
+  if (!kIsWeb) {
+    WidgetsFlutterBinding.ensureInitialized();
+    await initPathProvider();
+  }
   runApp(const MyApp());
 }
 

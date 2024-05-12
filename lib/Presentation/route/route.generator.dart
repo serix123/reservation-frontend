@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:online_reservation/Presentation/Modules/Approval/approvalDetails.view.dart';
 import 'package:online_reservation/Presentation/Modules/Approval/approvalList.view.dart';
 import 'package:online_reservation/Presentation/Modules/Authentication/auth.viewmodel.dart';
 import 'package:online_reservation/Presentation/Modules/Authentication/login.view.dart';
@@ -23,6 +24,7 @@ class RouteGenerator {
   static const profileScreen = ProfileScreen.screen_id;
   static const eventListScreen = EventListScreen.screen_id;
   static const approvalListScreen = ApprovalScreen.screen_id;
+  static const approvalDetailsScreen = ApprovalDetailsScreen.screen_id;
 
   static Route<dynamic> generateRoute(
       RouteSettings settings, BuildContext context) {
@@ -32,6 +34,12 @@ class RouteGenerator {
 
     if (authViewModel.isLoggedIn) {
       switch (settings.name) {
+        case approvalDetailsScreen:
+        if(args is String?) {
+            return MaterialPageRoute(
+                builder: (_) => ApprovalDetailsScreen(slip_no: args));
+          } return MaterialPageRoute(builder: (_) => const ReservationScreen());
+
         case eventListScreen:
           return MaterialPageRoute(builder: (_) => const EventListScreen());
         // case '/':

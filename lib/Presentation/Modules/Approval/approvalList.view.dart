@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:online_reservation/Data/API_Services/pdf.service.dart';
+import 'package:online_reservation/Data/API_Services/PDF_Services/pdf.service.dart';
+import 'package:online_reservation/Data/API_Services/PDF_Services/pdfApi.service.dart';
 import 'package:online_reservation/Data/Models/approval.model.dart';
 import 'package:online_reservation/Presentation/Modules/Approval/approvalList.viewmodel.dart';
 import 'package:online_reservation/Presentation/Modules/Employee/employee.viewmodel.dart';
@@ -234,13 +235,13 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
                                   ],
                                 )
                               : IconButton(
-                              onPressed: () async {
+                              onPressed: () {
 
-                                final pdfFile = await PDFService.generatePDF();
-                                PdfApi.openFile(pdfFile);
-                                // var args = ReservationScreenArguments(slipNo: event.slip_number,type: RequestType.Update);
-                                // Navigator.of(context)
-                                //     .pushNamed(RouteGenerator.reservationScreen, arguments: args);
+                                // final pdfFile = await PDFService.generatePDFTest();
+                                // PdfApi.openFile(pdfFile);
+                                var args = ReservationScreenArguments(slipNo: item.slip_number,type: RequestType.Update);
+                                Navigator.of(context)
+                                    .pushNamed(RouteGenerator.reservationScreen, arguments: args);
 
                               },
                               icon: const Icon(Icons.remove_red_eye,

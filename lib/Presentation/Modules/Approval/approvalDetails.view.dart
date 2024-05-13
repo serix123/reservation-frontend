@@ -75,9 +75,9 @@ class _ApprovalDetailsScreenState extends State<ApprovalDetailsScreen> {
                 .employees
                 .firstWhere((employee) =>
                     employee.id == approval.person_in_charge_approver);
-        Employee admin = Provider.of<EmployeeViewModel>(context, listen: false)
-            .employees
-            .firstWhere((employee) => employee.id == approval.admin_approver);
+        // Employee admin = Provider.of<EmployeeViewModel>(context, listen: false)
+        //     .employees
+        //     .firstWhere((employee) => employee.id == approval.admin_approver);
         var eventEquipments =
             Provider.of<EventViewModel>(context, listen: false)
                 .userEvent!
@@ -98,7 +98,7 @@ class _ApprovalDetailsScreenState extends State<ApprovalDetailsScreen> {
               "${immediate_head.firstName} ${immediate_head.lastName}";
           receipt.person_in_charge =
               "${person_in_charge.firstName} ${person_in_charge.lastName}";
-          receipt.admin = "${admin.firstName} ${admin.lastName}";
+          // receipt.admin = "${admin.firstName} ${admin.lastName}";
         });
         stateLoaded = true;
       }
@@ -251,7 +251,7 @@ class _ApprovalDetailsScreenState extends State<ApprovalDetailsScreen> {
                           'Location: ${facilityViewModel.facilities.firstWhere((facility) => receipt.event?.reserved_facility == facility.id).name ?? "Facility Blank"}',
                           style: const TextStyle(fontSize: 10)),
                       Text('Contact No: ${receipt.event?.contact_number ?? ""}',
-                          style: TextStyle(fontSize: 10)),
+                          style: const TextStyle(fontSize: 10)),
                     ],
                   ),
                   const SizedBox(
@@ -412,18 +412,18 @@ class _ApprovalDetailsScreenState extends State<ApprovalDetailsScreen> {
                             ),
                           ],
                         ),
-                        Row(
+                        const Row(
                           children: [
+                            // Expanded(
+                            //   child: Text(receipt.admin ?? "unavailable",
+                            //       style: const TextStyle(fontSize: 12)),
+                            // ),
                             Expanded(
-                              child: Text(receipt.admin ?? "unavailable",
-                                  style: const TextStyle(fontSize: 12)),
-                            ),
-                            const Expanded(
                               child: Center(
                                   child: Text('Admin',
                                       style: TextStyle(fontSize: 12))),
                             ),
-                            const Expanded(
+                            Expanded(
                               child: Icon(
                                 Icons.check_circle,
                                 color: success,
@@ -453,7 +453,7 @@ class Receipt {
   List<Equipment>? equipments;
   String? immediate_head;
   String? person_in_charge;
-  String? admin;
+  // String? admin;
 
   Receipt({
     this.event,
@@ -461,6 +461,6 @@ class Receipt {
     this.immediate_head,
     this.equipments,
     this.person_in_charge,
-    this.admin
+    // this.admin
   });
 }

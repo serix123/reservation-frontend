@@ -77,7 +77,14 @@ class RouteGenerator {
           return _errorRoute();
       }
     } else {
-      return MaterialPageRoute(builder: (_) => const LoginScreen());
+      switch (settings.name) {
+        case registerScreen:
+          return MaterialPageRoute(builder: (_) => const RegistrationScreen());
+        case loginScreen:
+          return MaterialPageRoute(builder: (_) => const LoginScreen());
+        default:
+          return MaterialPageRoute(builder: (_) => const LoginScreen());
+      }
     }
   }
 

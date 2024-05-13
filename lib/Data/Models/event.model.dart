@@ -71,6 +71,7 @@ class Event {
     'end_time': end_time.toIso8601String(),
     'equipments':equipments?.map((equipment) => equipment.toJson()).toList(),
     'status': status,
+    'admin_approver':null,
     // 'event_file': file,
   };
 }

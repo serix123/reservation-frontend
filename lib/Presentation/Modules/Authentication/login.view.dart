@@ -6,9 +6,30 @@ import 'package:online_reservation/Presentation/Modules/Widgets/customCard.widge
 import 'package:online_reservation/Presentation/route/route.generator.dart';
 import 'package:online_reservation/config/app.color.dart';
 
-class LoginScreen extends StatelessWidget {
+class LoginScreen extends StatefulWidget {
   static const String screen_id = "/login";
   const LoginScreen({super.key});
+
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+  late TextEditingController emailController;
+  late TextEditingController passwordController;
+  @override
+  void initState() {
+    super.initState();
+    emailController = TextEditingController();
+    passwordController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -49,8 +70,8 @@ class LoginScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(6),
                     ),
                     focusedBorder: OutlineInputBorder(
-                      borderSide: const BorderSide(
-                          color: kPurpleDark, width: 2),
+                      borderSide:
+                          const BorderSide(color: kPurpleDark, width: 2),
                       borderRadius: BorderRadius.circular(6),
                     ),
                     prefixIcon: Icon(Icons.email),
@@ -78,8 +99,8 @@ class LoginScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(6),
                     ),
                     focusedBorder: OutlineInputBorder(
-                      borderSide: const BorderSide(
-                          color: kPurpleDark, width: 2),
+                      borderSide:
+                          const BorderSide(color: kPurpleDark, width: 2),
                       borderRadius: BorderRadius.circular(6),
                     ),
                     prefixIcon: Icon(Icons.lock),
@@ -109,7 +130,8 @@ class LoginScreen extends StatelessWidget {
                 ),
                 TextButton(
                   onPressed: () {
-                    Navigator.of(context).pushReplacementNamed(RouteGenerator.registerScreen);
+                    Navigator.of(context)
+                        .pushReplacementNamed(RouteGenerator.registerScreen);
                   },
                   child: const Text('Don\'t have an account? Register'),
                 ),

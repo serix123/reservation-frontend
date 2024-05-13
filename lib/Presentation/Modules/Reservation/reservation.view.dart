@@ -258,7 +258,7 @@ class _ReservationScreenState extends State<ReservationScreen> {
             _eventNameController.text = event.event_name!;
             _eventDescriptionController.text = event.event_description!;
             _participantNumberController.text =
-                event.participants_quantity!.toString();
+                event.participants_quantity?.toString() ?? "";
             _additionalRequirementsController.text =
                 event.additional_needs ?? "";
             _selectedStartDate = Utils.extractDateOnly(event.start_time);
@@ -292,6 +292,7 @@ class _ReservationScreenState extends State<ReservationScreen> {
   @override
   void initState() {
     super.initState();
+    event = Event(event_name: "event_name", start_time: _selectedStartDate, end_time: _selectedEndDate);
     _requesitionerController = TextEditingController();
     _departmentController = TextEditingController();
     _contactNoController = TextEditingController();
@@ -497,7 +498,7 @@ class _ReservationScreenState extends State<ReservationScreen> {
                     onPressed: enabled ? _showFacilityPicker : null,
                     child: Text(selectedFacility == null
                         ? 'Select Facility'
-                        : 'Facility: ${selectedFacility!.name}'),
+                        : 'Facility: ${selectedFacility?.name ?? ""}'),
                   ),
                   const SizedBox(height: 20),
                   Text(
@@ -669,7 +670,7 @@ class _ReservationScreenState extends State<ReservationScreen> {
                                         }
                                         if (!addedEquipments.any((equipment) =>
                                             equipment.equipment ==
-                                            selectedEquipment!.id)) {
+                                            (selectedEquipment?.id ?? 0))) {
                                           setState(() {
                                             addedEquipments.add(EventEquipment(
                                                 equipment:
@@ -745,6 +746,13 @@ class _ReservationScreenState extends State<ReservationScreen> {
                     if (widget.args?.slipNo == null)
                       ElevatedButton(
                         onPressed: () {
+                          if(selectedFacility == null){
+                            const snackBar = SnackBar(
+                              content: Text('Please pick a facility!'),
+                            );
+                            ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                            return;
+                          }
                           if (_formKey.currentState!.validate()) {
                             // Process the reservation
                             print("Processing reservation...");

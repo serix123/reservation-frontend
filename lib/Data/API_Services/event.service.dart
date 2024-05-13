@@ -89,6 +89,52 @@ class EventAPIService {
     return null;
   }
 
+  Future<bool> cancelEvent(String slipNo) async {
+    try {
+      String? token = await storage.read(key: "access");
+      final response = await http.post(
+        Uri.parse('${appURL}events/cancel/${slipNo}'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      );
+      if (response.statusCode == 200) {
+        var body = json.decode(response.body);
+        print(body);
+        var responseObj= {'status':body['status']};
+        print('status: ${responseObj['status']}');
+        return true;
+      } else {
+        throw Exception('Failed to cancel event');
+      }
+    } catch (e) {
+      print('error: $e');
+    }
+    return false;
+  }
+  Future<bool> deleteEvent(int id) async {
+    try {
+      String? token = await storage.read(key: "access");
+      final response = await http.delete(
+        Uri.parse('${appURL}event/${id}/'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      );
+      if (response.statusCode == 204) {
+        print('status: deleted');
+        return true;
+      } else {
+        throw Exception('Failed to delete event');
+      }
+    } catch (e) {
+      print('error: $e');
+    }
+    return false;
+  }
+
   Future<bool> registerEvent(Event event) async {
     String? token = await storage.read(key: "access");
 

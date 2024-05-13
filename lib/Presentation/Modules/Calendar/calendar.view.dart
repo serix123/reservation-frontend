@@ -139,7 +139,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                     children: List.generate(
                       24,
                       (index) {
-                        List<Widget> hourEvents = eventViewModel.events
+                        List<Widget> hourEvents = eventViewModel.scheduledEvents
                             .where((event) =>
                                 event.start_time.day == _focusedDay.day)
                             .where((event) {

@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:online_reservation/Data/API_Services/PDF_Services/pdf.service.dart';
-import 'package:online_reservation/Data/API_Services/PDF_Services/pdfApi.service.dart';
 import 'package:online_reservation/Data/Models/approval.model.dart';
 import 'package:online_reservation/Presentation/Modules/Approval/approvalList.viewmodel.dart';
 import 'package:online_reservation/Presentation/Modules/Employee/employee.viewmodel.dart';
@@ -24,6 +22,7 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
   ListType? _listValue;
   List<Approval>? lists;
   int? itemCount;
+  bool stateLoaded = false;
 
   Future<void> fetchDataFromAPI() async {
     try {
@@ -42,6 +41,7 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
           lists =
               Provider.of<EmployeeViewModel>(context, listen: false).approvals;
           _listValue = ListType.Self;
+          stateLoaded = true;
         });
       }
     } catch (error) {
@@ -61,7 +61,7 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
   Widget body() {
     return Consumer2<ApprovalViewModel, EmployeeViewModel>(
       builder: (context, approvalViewModel, employeeViewModel, child) {
-        if ((approvalViewModel.isLoading || employeeViewModel.isLoading) &&
+        if ((approvalViewModel.isLoading || employeeViewModel.isLoading || !stateLoaded) &&
             lists == null) {
           return const Center(child: CircularProgressIndicator());
         }
@@ -129,12 +129,11 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
                         });
                       },
                       items: ListType.values.map((ListType type) {
+                        bool isAdmin = employeeViewModel.profile?.isAdmin ?? false;
+                        bool facilityNotEmpty = employeeViewModel.profile?.managed_facilities?.isNotEmpty ?? false;
                         return DropdownMenuItem<ListType>(
-                          enabled: (type != ListType.Admin ||
-                                  employeeViewModel.profile!.isAdmin!) &&
-                              (type != ListType.PersonInCharge ||
-                                  employeeViewModel.profile!.managed_facilities!
-                                      .isNotEmpty) &&
+                          enabled: (type != ListType.Admin || isAdmin ) &&
+                              (type != ListType.PersonInCharge || facilityNotEmpty) &&
                               (type != ListType.ImmediateHead ||
                                   employeeViewModel
                                       .immediate_head_approvals.isNotEmpty),
@@ -160,9 +159,9 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
               else
                 ListView(
                   shrinkWrap: true,
-                  children: lists!.map((item) {
+                  children: lists?.map((item) {
                     if (approvalViewModel.isLoading ||
-                        employeeViewModel.isLoading) {
+                        employeeViewModel.isLoading || !stateLoaded) {
                       return const Center(child: CircularProgressIndicator());
                     }
                     return Padding(
@@ -235,21 +234,32 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
                                   ],
                                 )
                               : IconButton(
-                              onPressed: () {
+                                  onPressed: () {
+                                    // final pdfFile = await PDFService.generatePDFTest();
+                                    // PdfApi.openFile(pdfFile);
 
-                                // final pdfFile = await PDFService.generatePDFTest();
-                                // PdfApi.openFile(pdfFile);
-                                var args = ReservationScreenArguments(slipNo: item.slip_number,type: RequestType.Update);
-                                Navigator.of(context)
-                                    .pushNamed(RouteGenerator.reservationScreen, arguments: args);
-
-                              },
-                              icon: const Icon(Icons.remove_red_eye,
-                                  color: kPurpleDark)),
+                                    if (item.status == "approved") {
+                                      Navigator.of(context).pushNamed(
+                                          RouteGenerator.approvalDetailsScreen,
+                                          arguments: item.slip_number);
+                                    } else {
+                                      var args = ReservationScreenArguments(
+                                          slipNo: item.slip_number,
+                                          type: RequestType.Read);
+                                      Navigator.of(context).pushNamed(
+                                          RouteGenerator.reservationScreen,
+                                          arguments: args);
+                                    }
+                                  },
+                                  icon: Icon(
+                                      item.status == "approved"
+                                          ? Icons.receipt_long_rounded
+                                          : Icons.remove_red_eye_rounded,
+                                      color: kPurpleDark)),
                         ),
                       ),
                     );
-                  }).toList(),
+                  }).toList() ?? List.generate(1, (index) => Center(child: Text("Empty List"))),
                 )
             ],
           ),

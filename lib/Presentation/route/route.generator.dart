@@ -37,7 +37,7 @@ class RouteGenerator {
         case approvalDetailsScreen:
         if(args is String?) {
             return MaterialPageRoute(
-                builder: (_) => ApprovalDetailsScreen(slip_no: args));
+                builder: (_) => ApprovalDetailsScreen(slipNo: args));
           } return MaterialPageRoute(builder: (_) => const ReservationScreen());
 
         case eventListScreen:

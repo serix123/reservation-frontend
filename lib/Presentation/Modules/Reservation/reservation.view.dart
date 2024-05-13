@@ -37,9 +37,9 @@ class ReservationScreen extends StatefulWidget {
 class _ReservationScreenState extends State<ReservationScreen> {
   final _formKey = GlobalKey<FormState>();
   late bool enabled;
-
   late Event event;
 
+  bool stateLoaded = false;
   String? _statusValue = 'draft';
   late TextEditingController _requesitionerController;
   late TextEditingController _departmentController;
@@ -280,6 +280,7 @@ class _ReservationScreenState extends State<ReservationScreen> {
                 end_time:
                     Utils.combineDateTime(_selectedEndDate, _selectedEndTime));
           }
+          stateLoaded = true;
         });
       }
     } catch (error) {
@@ -331,7 +332,8 @@ class _ReservationScreenState extends State<ReservationScreen> {
             eventViewModel, child) {
       if (equipmentViewModel.isLoading ||
           employeeViewModel.isLoading ||
-          eventViewModel.isLoading) {
+          eventViewModel.isLoading ||
+          !stateLoaded) {
         return const Center(child: CircularProgressIndicator());
       }
       return Stack(children: [
@@ -765,7 +767,7 @@ class _ReservationScreenState extends State<ReservationScreen> {
                             child: const Text('Update Reservation'),
                           ),
                           const SizedBox(
-                            width: 50,
+                            width: 20,
                           ),
                           TextButton(
                             onPressed: () {
@@ -789,8 +791,8 @@ class _ReservationScreenState extends State<ReservationScreen> {
                               overlayColor: MaterialStateProperty.all(
                                   Colors.red[200]), // Splash color on press
                             ),
-                            child: const Text(
-                              "Delete Reservation",
+                            child: Text(
+                              "${event.status == 'confirmed' ? 'Cancel' : 'Delete'} Reservation",
                               style: TextStyle(color: kBackgroundGrey),
                             ),
                           ),
@@ -855,6 +857,7 @@ class _ReservationScreenState extends State<ReservationScreen> {
             actions: <Widget>[
               TextButton(
                 onPressed: () async {
+                  var cancel = event.status == 'confirmed' ? true : false;
                   Navigator.of(context).pop(); // Close the dialog
                   setState(() {
                     event.event_name = _eventNameController.text;
@@ -887,22 +890,27 @@ class _ReservationScreenState extends State<ReservationScreen> {
                       break;
                     case RequestType.Delete:
                       // TODO: Handle this case.
-                      success = false;
+                      if (cancel) {
+                        success = await eventViewModel
+                            .cancelEvent(event.slip_number!);
+                      } else {
+                        success = await eventViewModel.deleteEvent(event.id!);
+                      }
                       break;
                     case RequestType.Read:
                       // TODO: Handle this case.
                       success = false;
                       break;
                   }
+                  Navigator.of(context).pop();
                   if (mounted) {
                     if (success) {
-                      Navigator.of(context).pop();
                       showDialog(
                         context: context,
                         builder: (BuildContext context) {
                           return AlertDialog(
                             title: const Text('Confirmed'),
-                            content: const Text('Reservation is made'),
+                            content: const Text('Process Success!'),
                             actions: <Widget>[
                               TextButton(
                                 onPressed: () {

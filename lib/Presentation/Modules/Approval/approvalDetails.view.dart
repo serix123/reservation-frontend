@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:intl/intl.dart';
@@ -134,8 +135,10 @@ class _ApprovalDetailsScreenState extends State<ApprovalDetailsScreen> {
   Widget build(BuildContext context) {
     final logo = const AssetImage('assets/images/SISC_LOGO.png');
 
-    return Scaffold(
-      floatingActionButton: FloatingActionButton(
+      return Scaffold(
+        floatingActionButton:
+         kIsWeb == false ?
+      FloatingActionButton(
         onPressed: () async {
           // Capture a screenshot of the widget
           final image = await screenshotController.capture();
@@ -179,7 +182,7 @@ class _ApprovalDetailsScreenState extends State<ApprovalDetailsScreen> {
           color: Colors.white,
           size: 20,
         ),
-      ),
+      ) : null,
       appBar: AppBar(
         title: const Text('Event Details'),
       ),
@@ -247,7 +250,7 @@ class _ApprovalDetailsScreenState extends State<ApprovalDetailsScreen> {
                       Text(
                           'Location: ${facilityViewModel.facilities.firstWhere((facility) => receipt.event?.reserved_facility == facility.id).name ?? "Facility Blank"}',
                           style: const TextStyle(fontSize: 10)),
-                      const Text('Contact No: 09294517191',
+                      Text('Contact No: ${receipt.event?.contact_number ?? ""}',
                           style: TextStyle(fontSize: 10)),
                     ],
                   ),

@@ -26,17 +26,18 @@ class CustomNavigationDrawer extends StatelessWidget {
                 child: ListView(
                   padding: EdgeInsets.zero,
                   children: <Widget>[
-                    const DrawerHeader(
-                      decoration: BoxDecoration(
-                        color: kPurpleNormal,
+                    DrawerHeader(
+                      decoration: const BoxDecoration(
+                        color: kPurpleLight,
                       ),
-                      child: Text(
-                        'Navigation',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 24,
-                        ),
-                      ),
+                      child: Image.asset('assets/images/SISC_BANNER.png'),
+                      // child: Text(
+                      //   'Navigation',
+                      //   style: TextStyle(
+                      //     color: Colors.white,
+                      //     fontSize: 24,
+                      //   ),
+                      // ),
                     ),
                     _createDrawerItem(
                       context: context,
@@ -118,7 +119,7 @@ class CustomNavigationDrawer extends StatelessWidget {
                         Icons.exit_to_app,
                         color: kPurpleDark,
                       ),
-                      title: Text('Logout'),
+                      title: const Text('Logout'),
                       onTap: () {
                         viewModel.logout();
                         Navigator.pushNamedAndRemoveUntil(

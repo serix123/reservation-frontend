@@ -10,7 +10,7 @@ class Approval {
   String? status;
   int? immediate_head_approver;
   int? person_in_charge_approver;
-  int? admin_approver;
+  // int? admin_approver;
   int? immediate_head_status;
   int? person_in_charge_status;
   int? admin_status;
@@ -29,7 +29,7 @@ class Approval {
     required this.status,
     required this.immediate_head_approver,
     required this.person_in_charge_approver,
-    required this.admin_approver,
+    // required this.admin_approver,
     required this.immediate_head_status,
     required this.person_in_charge_status,
     required this.admin_status,
@@ -52,7 +52,7 @@ class Approval {
       requesitioner: json['requesitioner'],
       immediate_head_approver: json['immediate_head_approver'],
       person_in_charge_approver: json['person_in_charge_approver'],
-      admin_approver: json['admin_approver'],
+      // admin_approver: json['admin_approver'],
       immediate_head_status: json['immediate_head_status'],
       person_in_charge_status: json['person_in_charge_status'],
       admin_status: json['admin_status'],

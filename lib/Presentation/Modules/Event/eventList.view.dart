@@ -83,7 +83,7 @@ class _EventListScreenState extends State<EventListScreen> {
                               Navigator.of(context)
                                   .pushNamed(RouteGenerator.reservationScreen, arguments: args);
                             },
-                            icon: const Icon(Icons.remove_red_eye,
+                            icon: const Icon(Icons.edit_note_rounded,
                                 color: kPurpleDark)),
                         onTap: () {
                           // Handle the tap event if necessary

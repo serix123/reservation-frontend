@@ -1,17 +1,28 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:image_gallery_saver/image_gallery_saver.dart';
+import 'package:intl/intl.dart';
+import 'package:online_reservation/Data/Models/approval.model.dart';
+import 'package:online_reservation/Data/Models/employee.model.dart';
+import 'package:online_reservation/Data/Models/equipment.model.dart';
+import 'package:online_reservation/Data/Models/event.model.dart';
+import 'package:online_reservation/Presentation/Modules/Approval/approvalList.viewmodel.dart';
+import 'package:online_reservation/Presentation/Modules/Authentication/auth.viewmodel.dart';
+import 'package:online_reservation/Presentation/Modules/Employee/employee.viewmodel.dart';
+import 'package:online_reservation/Presentation/Modules/Event/event.viewmodel.dart';
+import 'package:online_reservation/Presentation/Modules/Facility/facilityList.viewmodel.dart';
+import 'package:online_reservation/Presentation/Modules/Reservation/reservation.viewmodel.dart';
 import 'package:online_reservation/Presentation/Modules/Widgets/customPurpleContainer.widget.dart';
 import 'package:online_reservation/config/app.color.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:provider/provider.dart';
 import 'package:widgets_to_image/widgets_to_image.dart';
 import 'package:screenshot/screenshot.dart';
-import 'package:share/share.dart';
 
 class ApprovalDetailsScreen extends StatefulWidget {
   static const String screen_id = "/approvalDetails";
-  final String? slip_no;
-  const ApprovalDetailsScreen({super.key, this.slip_no});
+  final String? slipNo;
+  const ApprovalDetailsScreen({super.key, this.slipNo});
 
   @override
   State<ApprovalDetailsScreen> createState() => _ApprovalDetailsScreenState();
@@ -21,12 +32,89 @@ class _ApprovalDetailsScreenState extends State<ApprovalDetailsScreen> {
   late final ScreenshotController screenshotController;
   late WidgetsToImageController controller;
   // late ScrollController scrollController;
+  late Receipt receipt = Receipt();
+  bool stateLoaded = false;
+
+  Future<void> initData() async {
+    var getEventFuture = widget.slipNo != null
+        ? Provider.of<EventViewModel>(context, listen: false)
+            .fetchEvent(widget.slipNo!)
+        : Future.value(null);
+    try {
+      // Gather all asynchronous operations.
+      await Future.wait([
+        Provider.of<ApprovalViewModel>(context, listen: false)
+            .fetchApprovals(),
+        Provider.of<EquipmentViewModel>(context, listen: false)
+            .fetchEquipment(),
+        Provider.of<FacilityViewModel>(context, listen: false)
+            .fetchFacilities(),
+        Provider.of<AuthenticationViewModel>(context, listen: false)
+            .refreshAccessToken(),
+        Provider.of<EmployeeViewModel>(context, listen: false).fetchProfile(),
+        Provider.of<EmployeeViewModel>(context, listen: false).fetchEmployees(),
+        getEventFuture,
+      ]);
+
+      // Use a short delay to simulate a network call (if needed).
+      await Future.delayed(const Duration(seconds: 1));
+
+      // Check if the widget is still mounted before calling setState.
+      if (mounted) {
+        var approval = Provider.of<ApprovalViewModel>(context, listen: false)
+            .userApproval
+            .firstWhere((approval) => approval.slip_number == widget.slipNo);
+        Employee immediate_head = Provider.of<EmployeeViewModel>(context,
+                listen: false)
+            .employees
+            .firstWhere(
+                (employee) => employee.id == approval.immediate_head_approver);
+        Employee person_in_charge =
+            Provider.of<EmployeeViewModel>(context, listen: false)
+                .employees
+                .firstWhere((employee) =>
+                    employee.id == approval.person_in_charge_approver);
+        Employee admin = Provider.of<EmployeeViewModel>(context, listen: false)
+            .employees
+            .firstWhere((employee) => employee.id == approval.admin_approver);
+        var eventEquipments =
+            Provider.of<EventViewModel>(context, listen: false)
+                .userEvent!
+                .equipments!;
+        List<Equipment> equipments = [];
+        for (var eventEquipment in eventEquipments) {
+          equipments.add(Provider.of<EquipmentViewModel>(context, listen: false)
+              .equipments
+              .firstWhere(
+                  (equipment) => equipment.id == eventEquipment.equipment));
+        }
+        setState(() {
+          receipt.event =
+              Provider.of<EventViewModel>(context, listen: false).userEvent!;
+          receipt.approval = approval;
+          receipt.equipments = equipments;
+          receipt.immediate_head =
+              "${immediate_head.firstName} ${immediate_head.lastName}";
+          receipt.person_in_charge =
+              "${person_in_charge.firstName} ${person_in_charge.lastName}";
+          receipt.admin = "${admin.firstName} ${admin.lastName}";
+        });
+        stateLoaded = true;
+      }
+    } catch (error) {
+      // Handle or log errors
+      print('Error fetching data: $error');
+    }
+  }
 
   @override
   void initState() {
     super.initState();
     screenshotController = ScreenshotController();
     controller = WidgetsToImageController();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      initData();
+    });
     // scrollController = ScrollController();
   }
 
@@ -44,7 +132,7 @@ class _ApprovalDetailsScreenState extends State<ApprovalDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final logo = AssetImage('assets/images/SISC_LOGO.png');
+    final logo = const AssetImage('assets/images/SISC_LOGO.png');
 
     return Scaffold(
       floatingActionButton: FloatingActionButton(
@@ -76,7 +164,7 @@ class _ApprovalDetailsScreenState extends State<ApprovalDetailsScreen> {
                     const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(50),
-                  color: Color(0xff656565),
+                  color: const Color(0xff656565),
                 ),
                 child: const Text('Screenshot saved in gallery.'),
               ),
@@ -93,7 +181,7 @@ class _ApprovalDetailsScreenState extends State<ApprovalDetailsScreen> {
         ),
       ),
       appBar: AppBar(
-        title: Text('Event Details'),
+        title: const Text('Event Details'),
       ),
       body: Screenshot(
         controller: screenshotController,
@@ -103,232 +191,273 @@ class _ApprovalDetailsScreenState extends State<ApprovalDetailsScreen> {
   }
 
   Widget receiptBody({required AssetImage logo}) {
-    return Container(
-      color: Colors.white,
-      padding: EdgeInsets.all(20),
-      child: Container(
-        color: Colors.white,
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Column(
-                  children: [
-                    Text('Reservation Receipt', style: TextStyle(fontSize: 18)),
-                    SizedBox(
-                        height: 150,
-                        child: Image(
-                          image: logo,
-                        )),
-                    Text('Event Name', style: TextStyle(fontSize: 24)),
-                    Text('Slip Number', style: TextStyle(fontSize: 20)),
-                  ],
-                ),
-              ),
-              SizedBox(height: 10),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Consumer4<ApprovalViewModel, EmployeeViewModel, EventViewModel,
+        FacilityViewModel>(
+      builder: (context, approvalViewModel, employeeViewModel, eventViewModel,
+          facilityViewModel, child) {
+        if (approvalViewModel.isLoading ||
+            employeeViewModel.isLoading ||
+            eventViewModel.isLoading ||
+            !stateLoaded) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        return Container(
+          color: Colors.white,
+          padding: const EdgeInsets.all(20),
+          child: Container(
+            color: Colors.white,
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Status: Status', style: TextStyle(fontSize: 10)),
-                  Text('Date: April 12, 2022', style: TextStyle(fontSize: 10)),
-                ],
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text('Location: Some Location',
-                      style: TextStyle(fontSize: 10)),
-                  Text('Contact No: 09294517191',
-                      style: TextStyle(fontSize: 10)),
-                ],
-              ),
-              SizedBox(
-                height: 25,
-              ),
-              CustomContainer(
-                  child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Column(
-                  children: [
-                    Row(
+                  Center(
+                    child: Column(
                       children: [
-                        Expanded(
-                          child: Text('Event Title',
-                              style: TextStyle(fontSize: 12)),
-                        ),
-                        Expanded(
-                          child: Text('Event Title',
-                              style: TextStyle(fontSize: 12)),
-                        ),
+                        const Text('Reservation Receipt',
+                            style: TextStyle(fontSize: 18)),
+                        SizedBox(
+                            height: 150,
+                            child: Image(
+                              image: logo,
+                            )),
+                        Text(
+                            receipt.event?.event_name?.toUpperCase() ?? "",
+                            style: const TextStyle(fontSize: 24)),
+                        Text(
+                            receipt.event?.slip_number?.toUpperCase() ?? "",
+                            style: const TextStyle(fontSize: 20)),
                       ],
                     ),
-                    Divider(
-                      thickness: 2,
-                    ),
-                    Row(
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                          'Status: ${receipt.event?.status?.toUpperCase() ?? ""}',
+                          style: const TextStyle(fontSize: 10)),
+                      Text(
+                          'Date: ${DateFormat('MMMM d, yyyy').format(receipt.approval?.status_update_date ?? DateTime.now())}',
+                          style: const TextStyle(fontSize: 10)),
+                    ],
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                          'Location: ${facilityViewModel.facilities.firstWhere((facility) => receipt.event?.reserved_facility == facility.id).name ?? "Facility Blank"}',
+                          style: const TextStyle(fontSize: 10)),
+                      const Text('Contact No: 09294517191',
+                          style: TextStyle(fontSize: 10)),
+                    ],
+                  ),
+                  const SizedBox(
+                    height: 25,
+                  ),
+                  CustomContainer(
+                      child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(
                       children: [
-                        Expanded(
-                          child: Text('Participants count',
-                              style: TextStyle(fontSize: 12)),
-                        ),
-                        Expanded(
-                          child: Text('Event Title',
-                              style: TextStyle(fontSize: 12)),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              )),
-              SizedBox(
-                height: 10,
-              ),
-              CustomContainer(
-                  child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Column(
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child:
-                              Text('Equipment', style: TextStyle(fontSize: 12)),
-                        ),
-                        Expanded(
-                          child: Center(
-                            child: Text('Quantity',
-                                style: TextStyle(fontSize: 12)),
-                          ),
-                        ),
-                      ],
-                    ),
-                    Divider(
-                      thickness: 2,
-                    ),
-                    Column(
-                      children: List.generate(
-                        16,
-                        (index) => Row(
+                        Row(
                           children: [
+                            const Expanded(
+                              child: Text('Event Personnel',
+                                  style: TextStyle(fontSize: 12)),
+                            ),
                             Expanded(
+                              child: Text('${employeeViewModel.profile?.firstName ?? ""} ${employeeViewModel.profile?.lastName ?? ""} ',
+                                  style: const TextStyle(fontSize: 12)),
+                            ),
+                          ],
+                        ),
+                        const Divider(
+                          thickness: 2,
+                        ),
+                        Row(
+                          children: [
+                            const Expanded(
                               child: Text('Participants count',
                                   style: TextStyle(fontSize: 12)),
                             ),
                             Expanded(
+                              child: Text(
+                                  '${receipt.event?.participants_quantity ?? 0}',
+                                  style: const TextStyle(fontSize: 12)),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  )),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  if(receipt.equipments?.length != null && receipt.equipments!.length > 0)
+                  CustomContainer(
+                      child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(
+                      children: [
+                        const Row(
+                          children: [
+                            Expanded(
+                              child: Text('Equipment',
+                                  style: TextStyle(fontSize: 12)),
+                            ),
+                            Expanded(
                               child: Center(
-                                child: Text('Event Title',
+                                child: Text('Quantity',
                                     style: TextStyle(fontSize: 12)),
                               ),
                             ),
                           ],
                         ),
-                      ),
-                    ),
-                  ],
-                ),
-              )),
-              SizedBox(
-                height: 10,
-              ),
-              CustomContainer(
-                  child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Column(
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child:
-                              Text('Approver', style: TextStyle(fontSize: 12)),
+                        const Divider(
+                          thickness: 2,
                         ),
-                        Expanded(
-                          child: Center(
-                            child: Text('Role', style: TextStyle(fontSize: 12)),
-                          ),
-                        ),
-                        Expanded(
-                          child: Center(
-                            child:
-                                Text('Status', style: TextStyle(fontSize: 12)),
+                        Column(
+                          children: List.generate(
+                            receipt.equipments?.length ?? 0,
+                            (index) => Row(
+                              children: [
+                                Expanded(
+                                  child: Text('${receipt.equipments?[index].equipment_name}',
+                                      style: const TextStyle(fontSize: 12)),
+                                ),
+                                Expanded(
+                                  child: Center(
+                                    child: Text('${receipt.equipments?[index].equipment_quantity}',
+                                        style: const TextStyle(fontSize: 12)),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ],
                     ),
-                    Divider(
-                      thickness: 2,
-                    ),
-                    Row(
+                  )),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                   CustomContainer(
+                      child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(
                       children: [
-                        Expanded(
-                          child: Text('Participants count',
-                              style: TextStyle(fontSize: 12)),
+                        const Row(
+                          children: [
+                            Expanded(
+                              child: Text('Approver',
+                                  style: TextStyle(fontSize: 12)),
+                            ),
+                            Expanded(
+                              child: Center(
+                                child: Text('Role',
+                                    style: TextStyle(fontSize: 12)),
+                              ),
+                            ),
+                            Expanded(
+                              child: Center(
+                                child: Text('Status',
+                                    style: TextStyle(fontSize: 12)),
+                              ),
+                            ),
+                          ],
                         ),
-                        Expanded(
-                          child: Center(
-                              child:
-                                  Text('role', style: TextStyle(fontSize: 12))),
+                        const Divider(
+                          thickness: 2,
                         ),
-                        Expanded(
-                          child: Icon(
-                            Icons.check_circle,
-                            color: success,
-                            size: 12,
-                          ),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(receipt.immediate_head ?? "unavailable",
+                                  style: const TextStyle(fontSize: 12)),
+                            ),
+                            const Expanded(
+                              child: Center(
+                                  child: Text('Immediate Head',
+                                      style: TextStyle(fontSize: 12))),
+                            ),
+                            const Expanded(
+                              child: Icon(
+                                Icons.check_circle,
+                                color: success,
+                                size: 12,
+                              ),
+                            ),
+                          ],
+                        ),
+                        Row(
+                          children: [
+                            Expanded(
+                              child:Text(receipt.person_in_charge ?? "unavailable",
+                                  style: const TextStyle(fontSize: 12)),
+                            ),
+                            const Expanded(
+                              child: Center(
+                                  child: Text('Person-in-Charge',
+                                      style: TextStyle(fontSize: 12))),
+                            ),
+                            const Expanded(
+                              child: Icon(
+                                Icons.check_circle,
+                                color: success,
+                                size: 12,
+                              ),
+                            ),
+                          ],
+                        ),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(receipt.admin ?? "unavailable",
+                                  style: const TextStyle(fontSize: 12)),
+                            ),
+                            const Expanded(
+                              child: Center(
+                                  child: Text('Admin',
+                                      style: TextStyle(fontSize: 12))),
+                            ),
+                            const Expanded(
+                              child: Icon(
+                                Icons.check_circle,
+                                color: success,
+                                size: 12,
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text('Participants count',
-                              style: TextStyle(fontSize: 12)),
-                        ),
-                        Expanded(
-                          child: Center(
-                              child:
-                                  Text('role', style: TextStyle(fontSize: 12))),
-                        ),
-                        Expanded(
-                          child: Icon(
-                            Icons.check_circle,
-                            color: success,
-                            size: 12,
-                          ),
-                        ),
-                      ],
-                    ),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text('Participants count',
-                              style: TextStyle(fontSize: 12)),
-                        ),
-                        Expanded(
-                          child: Center(
-                              child:
-                                  Text('role', style: TextStyle(fontSize: 12))),
-                        ),
-                        Expanded(
-                          child: Icon(
-                            Icons.check_circle,
-                            color: success,
-                            size: 12,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              )),
+                  )),
 
-              // Add more event details here
-            ],
+                  // Add more event details here
+                ],
+              ),
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
 
+class Receipt {
+  Event? event;
+  Approval? approval;
+  List<Equipment>? equipments;
+  String? immediate_head;
+  String? person_in_charge;
+  String? admin;
 
+  Receipt({
+    this.event,
+    this.approval,
+    this.immediate_head,
+    this.equipments,
+    this.person_in_charge,
+    this.admin
+  });
+}

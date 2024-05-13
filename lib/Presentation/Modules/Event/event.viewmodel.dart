@@ -71,6 +71,42 @@ class EventViewModel extends ChangeNotifier {
       notifyListeners();
     }
   }
+  Future<bool> cancelEvent(String slipNo) async {
+    _isLoading = true;
+    _errorMessage = '';
+    notifyListeners();
+    bool success = false;
+    try {
+      success = await _apiService.cancelEvent(slipNo);
+      _errorMessage = '';
+      return success;
+    } catch (e) {
+      _errorMessage = e.toString();
+      print(_errorMessage);
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+    return success;
+  }
+  Future<bool> deleteEvent(int id) async {
+    _isLoading = true;
+    _errorMessage = '';
+    notifyListeners();
+    bool success = false;
+    try {
+      success = await _apiService.deleteEvent(id);
+      _errorMessage = '';
+      return success;
+    } catch (e) {
+      _errorMessage = e.toString();
+      print(_errorMessage);
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+    return success;
+  }
   Future<bool> registerEvent(Event event) async {
     _errorMessage = '';
     _isRegistered = false;

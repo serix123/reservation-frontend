@@ -29,6 +29,13 @@ class Utils {
     return regex.hasMatch(email);
   }
 
+  static DateTime? parseDateTime(dynamic value) {
+    if (value == null) {
+      return null;
+    }
+    return DateTime.parse(value as String);
+  }
+
   static DateTime combineDateTime(DateTime date, TimeOfDay time) {
     return DateTime(date.year, date.month, date.day, time.hour, time.minute);
   }

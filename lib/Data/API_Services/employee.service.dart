@@ -20,8 +20,9 @@ class ApiService {
         throw Exception('Failed to load employees');
       }
     } catch (e) {
-      throw Exception('Failed to load employees: $e');
+      print(e);
     }
+    return [];
   }
 
   Future<Employee?> fetchProfile() async {

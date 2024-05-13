@@ -93,7 +93,7 @@ class EventAPIService {
     try {
       String? token = await storage.read(key: "access");
       final response = await http.post(
-        Uri.parse('${appURL}events/cancel/${slipNo}'),
+        Uri.parse('${appURL}events/cancel/${slipNo}/'),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',

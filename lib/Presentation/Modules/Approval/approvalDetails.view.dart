@@ -84,10 +84,12 @@ class _ApprovalDetailsScreenState extends State<ApprovalDetailsScreen> {
                 .equipments!;
         List<Equipment> equipments = [];
         for (var eventEquipment in eventEquipments) {
-          equipments.add(Provider.of<EquipmentViewModel>(context, listen: false)
+          var equipment = Provider.of<EquipmentViewModel>(context, listen: false)
               .equipments
               .firstWhere(
-                  (equipment) => equipment.id == eventEquipment.equipment));
+                  (equipment) => equipment.id == eventEquipment.equipment);
+          equipment.equipment_quantity = eventEquipment.quantity;
+          equipments.add(equipment);
         }
         setState(() {
           receipt.event =
@@ -269,8 +271,10 @@ class _ApprovalDetailsScreenState extends State<ApprovalDetailsScreen> {
                                   style: TextStyle(fontSize: 12)),
                             ),
                             Expanded(
-                              child: Text('${employeeViewModel.profile?.firstName ?? ""} ${employeeViewModel.profile?.lastName ?? ""} ',
-                                  style: const TextStyle(fontSize: 12)),
+                              child: Center(
+                                child: Text('${employeeViewModel.profile?.firstName ?? ""} ${employeeViewModel.profile?.lastName ?? ""} ',
+                                    style: const TextStyle(fontSize: 12)),
+                              ),
                             ),
                           ],
                         ),
@@ -284,9 +288,11 @@ class _ApprovalDetailsScreenState extends State<ApprovalDetailsScreen> {
                                   style: TextStyle(fontSize: 12)),
                             ),
                             Expanded(
-                              child: Text(
-                                  '${receipt.event?.participants_quantity ?? 0}',
-                                  style: const TextStyle(fontSize: 12)),
+                              child: Center(
+                                child: Text(
+                                    '${receipt.event?.participants_quantity ?? 0}',
+                                    style: const TextStyle(fontSize: 12)),
+                              ),
                             ),
                           ],
                         ),
@@ -414,10 +420,11 @@ class _ApprovalDetailsScreenState extends State<ApprovalDetailsScreen> {
                         ),
                         const Row(
                           children: [
-                            // Expanded(
-                            //   child: Text(receipt.admin ?? "unavailable",
-                            //       style: const TextStyle(fontSize: 12)),
-                            // ),
+                            Expanded(
+                              child: SizedBox()
+                              // Text(receipt.admin ?? "unavailable",
+                              //     style: const TextStyle(fontSize: 12)),
+                            ),
                             Expanded(
                               child: Center(
                                   child: Text('Admin',

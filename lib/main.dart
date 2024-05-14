@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:online_reservation/Presentation/Modules/Approval/approvalList.viewmodel.dart';
 import 'package:online_reservation/Presentation/Modules/Authentication/auth.viewmodel.dart';
+import 'package:online_reservation/Presentation/Modules/Department/department.viewmodel.dart';
 import 'package:online_reservation/Presentation/Modules/Employee/employee.viewmodel.dart';
 import 'package:online_reservation/Presentation/Modules/Event/event.viewmodel.dart';
 import 'package:online_reservation/Presentation/Modules/Facility/facilityList.viewmodel.dart';
@@ -33,12 +34,13 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        ChangeNotifierProvider(create: (context) => ApprovalViewModel()),
         ChangeNotifierProvider(create: (context) => AuthenticationViewModel()),
-        ChangeNotifierProvider(create: (context) => FacilityViewModel()),
+        ChangeNotifierProvider(create: (context) => DepartmentViewModel()),
         ChangeNotifierProvider(create: (context) => EmployeeViewModel()),
         ChangeNotifierProvider(create: (context) => EquipmentViewModel()),
         ChangeNotifierProvider(create: (context) => EventViewModel()),
-        ChangeNotifierProvider(create: (context) => ApprovalViewModel()),
+        ChangeNotifierProvider(create: (context) => FacilityViewModel()),
         ChangeNotifierProvider(create: (context) => NotificationViewModel()),
       ],
       builder: (context, child) {

@@ -70,7 +70,7 @@ class _NotificationPopupMenuState extends State<NotificationPopupMenu> {
       builder: (context, notificationViewModel, child) => PopupMenuButton(
         icon: const Icon(Icons.notifications),
         itemBuilder: (BuildContext context) => [
-          for (var notification in notificationViewModel.notifications)
+          for (var notification in notificationViewModel.notifications.reversed)
             PopupMenuItem(
               child: CustomContainer(
                 child: Column(

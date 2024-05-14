@@ -7,6 +7,7 @@ class Facility {
   int? person_in_charge;
   List<Event>? events;
   String? image;
+  String? facility_description;
 
   Facility({
     required this.id,
@@ -14,7 +15,8 @@ class Facility {
     this.department,
     this.person_in_charge,
     this.events,
-    this.image
+    this.image,
+    this.facility_description
   });
 
   factory Facility.fromJson(Map<String, dynamic> json) {
@@ -26,10 +28,11 @@ class Facility {
 
     return Facility(
       id: json['id'],
-      name: json['name'],
+      name: json['name']?? "",
       department: json['department']!= null ? int.tryParse(json['department'].toString()) : null,
       person_in_charge: json['person_in_charge']!= null ? int.tryParse(json['person_in_charge'].toString()) : null,
       image: json['image'],
+      facility_description: json['facility_description']?? "Nice Place...",
       events: eventsList,
     );
   }

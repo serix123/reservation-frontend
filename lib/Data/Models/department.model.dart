@@ -7,7 +7,7 @@ class Department {
   Department({
     required this.id,
      this.immediate_head,
-    required this.name,
+     this.name,
   });
 
   factory Department.fromJson(Map<String, dynamic> json) {

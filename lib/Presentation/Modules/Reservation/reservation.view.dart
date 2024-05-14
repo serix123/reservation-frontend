@@ -825,32 +825,7 @@ class _ReservationScreenState extends State<ReservationScreen> {
     });
   }
 
-  void _showDeleteDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text("Confirm"),
-          content: const Text("Are you sure you want to delete?"),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text("Cancel"),
-            ),
-            TextButton(
-              onPressed: () {
-                // Perform delete operation
-                Navigator.of(context).pop();
-                print("Item deleted");
-              },
-              child: const Text("Delete"),
-              style: TextButton.styleFrom(foregroundColor: Colors.red),
-            ),
-          ],
-        );
-      },
-    );
-  }
+
 
   void _showConfirmationDialog(RequestType type) {
     showDialog(

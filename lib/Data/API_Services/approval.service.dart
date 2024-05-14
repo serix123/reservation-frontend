@@ -30,6 +30,27 @@ class ApprovalAPIService {
     }
     return null;
   }
+  Future<List<Approval>?> fetchAllApproval() async {
+    List<Approval> approvals = [];
+    try {
+      String? token = await storage.read(key: "access");
+      final response = await http.get(Uri.parse('${appURL}approval/actions/'),headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },);
+      if (response.statusCode == 200) {
+        print(response.body);
+        List<dynamic> body = json.decode(response.body);
+        approvals = body.map((dynamic item) => Approval.fromJson(item)).toList();
+        return approvals;
+      } else {
+        throw Exception('error ${response.body}');
+      }
+    } catch (e) {
+      print("Failed to retrieve data: $e");
+    }
+    return null;
+  }
 
   Future<List<Approval>?> fetchHeadApproval(String id) async {
     List<Approval> approvals = [];

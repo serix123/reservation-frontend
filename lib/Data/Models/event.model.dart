@@ -3,12 +3,14 @@ import 'package:online_reservation/Data/Models/equipment.model.dart';
 
 class Event {
   int? id;
+  int? requesitioner;
   String? slip_number;
   String? event_name;
   String? event_description;
   String? contact_number;
   String? additional_needs;
   int? reserved_facility;
+  int? department;
   int? participants_quantity;
   DateTime start_time;
   DateTime end_time;
@@ -20,7 +22,9 @@ class Event {
 
   Event({
     this.id,
+    this.requesitioner,
     this.slip_number,
+    this.department,
     required this.event_name,
     this.event_description,
     this.contact_number,
@@ -43,7 +47,9 @@ class Event {
     }
     return Event(
       id: json['id'],
+      requesitioner: json['requesitioner'],
       slip_number: json['slip_number'],
+      department: json['department'],
       event_name: json['event_name'],
       event_description: json['event_description'],
       contact_number: json['contact_number'],
@@ -66,6 +72,7 @@ class Event {
     'contact_number': contact_number,
     'additional_needs': additional_needs,
     'reserved_facility': reserved_facility,
+    'department': department,
     'participants_quantity': participants_quantity,
     'start_time': start_time.toIso8601String(),
     'end_time': end_time.toIso8601String(),

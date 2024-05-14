@@ -138,17 +138,16 @@ class EventViewModel extends ChangeNotifier {
     try {
       _isRegistered = await _apiService.updateEvent(event);
       _errorMessage = '';
-      return true;
+      return _isRegistered;
     } catch (e) {
       _errorMessage = e.toString();
       _isRegistered = false;
-      return false;
+      return _isRegistered;
     } finally {
       _isLoading = false;
       print('_eventLoad: $_isLoading');
       _isRegistered = true;
       notifyListeners();
-
     }
   }
 }

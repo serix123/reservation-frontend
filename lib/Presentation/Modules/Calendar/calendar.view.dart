@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:online_reservation/Data/Models/event.model.dart';
 import 'package:online_reservation/Presentation/Modules/Event/event.viewmodel.dart';
+import 'package:online_reservation/Presentation/Modules/Facility/facilityList.viewmodel.dart';
 import 'package:online_reservation/Presentation/Modules/Widgets/responsiveLayout.widget.dart';
 import 'package:online_reservation/Utils/utils.dart';
 import 'package:online_reservation/config/app.color.dart';
@@ -59,6 +60,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
       await Future.wait([
         Provider.of<EventViewModel>(context, listen: false).fetchAllEvents(),
         Provider.of<EventViewModel>(context, listen: false).fetchUserEvents(),
+        Provider.of<FacilityViewModel>(context, listen: false)
+            .fetchFacilities(),
       ]);
 
       // Use a short delay to simulate a network call (if needed).
@@ -107,8 +110,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
   }
 
   Widget body() {
-    return Consumer<EventViewModel>(
-      builder: (context, eventViewModel, child) {
+    return Consumer2<EventViewModel, FacilityViewModel>(
+      builder: (context, eventViewModel, facilityViewModel, child) {
         if (eventViewModel.isLoading) {
           return const Center(child: CircularProgressIndicator());
         }
@@ -167,8 +170,15 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                 child: Container(
                                     padding: EdgeInsets.all(5),
                                     height: height - 2,
-                                    child: Text(
-                                        '${event.event_name ?? ""} - ${event.status}'))),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                            '${event.event_name ?? ""} - ${event.status?.toUpperCase() ?? "unknown"}'),
+                                        Text(
+                                            '${facilityViewModel.facilities.firstWhere((facility) => facility.id == event.reserved_facility).name ?? ""} '),
+                                      ],
+                                    ))),
                           );
                         }).toList();
                         return Stack(clipBehavior: Clip.none, children: [

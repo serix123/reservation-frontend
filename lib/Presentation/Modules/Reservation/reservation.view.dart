@@ -2,6 +2,8 @@ import 'dart:typed_data';
 import 'package:collection/collection.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:online_reservation/Data/Models/department.model.dart';
+import 'package:online_reservation/Presentation/Modules/Department/department.viewmodel.dart';
 import 'package:online_reservation/Presentation/Modules/Event/event.viewmodel.dart';
 import 'package:online_reservation/Presentation/Modules/Event/eventList.view.dart';
 import 'package:online_reservation/Utils/utils.dart';
@@ -226,6 +228,8 @@ class _ReservationScreenState extends State<ReservationScreen> {
       await Future.wait([
         Provider.of<EquipmentViewModel>(context, listen: false)
             .fetchEquipment(),
+        Provider.of<DepartmentViewModel>(context, listen: false)
+            .fetchDepartment(),
         Provider.of<FacilityViewModel>(context, listen: false)
             .fetchFacilities(),
         Provider.of<AuthenticationViewModel>(context, listen: false)
@@ -242,6 +246,7 @@ class _ReservationScreenState extends State<ReservationScreen> {
                       ?.name ??
                   "";
         }),
+        Provider.of<EmployeeViewModel>(context, listen: false).fetchEmployees(),
         getEventFuture,
       ]);
 
@@ -272,6 +277,27 @@ class _ReservationScreenState extends State<ReservationScreen> {
                         (facility) => facility.id == event.reserved_facility);
             addedEquipments = event.equipments ?? [];
             _fileName = event.file?.split('/').last;
+            _requesitionerController.text =
+                '${Provider.of<EmployeeViewModel>(context, listen: false).employees.firstWhere((emp) => emp.id == event.requesitioner).firstName ?? ""} ${Provider.of<EmployeeViewModel>(context, listen: false).employees.firstWhere((emp) => emp.id == event.requesitioner).lastName ?? ""}';
+            var requesitionerDept =
+                Provider.of<EmployeeViewModel>(context, listen: false)
+                    .employees
+                    .firstWhere((emp) => emp.id == event.requesitioner)
+                    .department;
+            if (event.department == null) {
+            _departmentController.text =
+                (Provider.of<DepartmentViewModel>(context, listen: false)
+                        .departments
+                        .firstWhere((dept) => dept.id == requesitionerDept)
+                        .name )??
+                    "";
+            }else{
+              _departmentController.text =
+              (Provider.of<DepartmentViewModel>(context, listen: false)
+                      .departments
+                      .firstWhere((dept) => dept.id == event.department)
+                      ?.name) ?? "";
+            }
           } else {
             event = Event(
                 event_name: "test",
@@ -292,7 +318,10 @@ class _ReservationScreenState extends State<ReservationScreen> {
   @override
   void initState() {
     super.initState();
-    event = Event(event_name: "event_name", start_time: _selectedStartDate, end_time: _selectedEndDate);
+    event = Event(
+        event_name: "event_name",
+        start_time: _selectedStartDate,
+        end_time: _selectedEndDate);
     _requesitionerController = TextEditingController();
     _departmentController = TextEditingController();
     _contactNoController = TextEditingController();
@@ -746,11 +775,12 @@ class _ReservationScreenState extends State<ReservationScreen> {
                     if (widget.args?.slipNo == null)
                       ElevatedButton(
                         onPressed: () {
-                          if(selectedFacility == null){
+                          if (selectedFacility == null) {
                             const snackBar = SnackBar(
                               content: Text('Please pick a facility!'),
                             );
-                            ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                            ScaffoldMessenger.of(context)
+                                .showSnackBar(snackBar);
                             return;
                           }
                           if (_formKey.currentState!.validate()) {
@@ -825,8 +855,6 @@ class _ReservationScreenState extends State<ReservationScreen> {
     });
   }
 
-
-
   void _showConfirmationDialog(RequestType type) {
     showDialog(
       context: context,
@@ -841,7 +869,7 @@ class _ReservationScreenState extends State<ReservationScreen> {
               TextButton(
                 onPressed: () async {
                   var cancel = event.status == 'confirmed' ? true : false;
-                  Navigator.of(context).pop(); // Close the dialog
+
                   setState(() {
                     event.event_name = _eventNameController.text;
                     event.event_description = _eventDescriptionController.text;
@@ -849,6 +877,11 @@ class _ReservationScreenState extends State<ReservationScreen> {
                     event.additional_needs =
                         _additionalRequirementsController.text;
                     event.reserved_facility = selectedFacility?.id;
+                    event.department =
+                        Provider.of<EmployeeViewModel>(context, listen: false)
+                                .profile
+                                ?.department ??
+                            1;
                     event.participants_quantity =
                         int.parse(_participantNumberController.text);
                     event.start_time = Utils.combineDateTime(
@@ -885,8 +918,10 @@ class _ReservationScreenState extends State<ReservationScreen> {
                       success = false;
                       break;
                   }
-                  Navigator.of(context).pop();
+
                   if (mounted) {
+                    Navigator.of(context)
+                        .popAndPushNamed(EventListScreen.screen_id);
                     if (success) {
                       showDialog(
                         context: context,
@@ -899,8 +934,8 @@ class _ReservationScreenState extends State<ReservationScreen> {
                                 onPressed: () {
                                   Navigator.of(context)
                                       .pop(); // Close the dialog
-                                  Navigator.of(context).popAndPushNamed(
-                                      EventListScreen.screen_id);
+                                  // Navigator.of(context).popAndPushNamed(
+                                  //     EventListScreen.screen_id);
                                 },
                                 child: const Text('OK'),
                               ),
@@ -921,8 +956,8 @@ class _ReservationScreenState extends State<ReservationScreen> {
                                 onPressed: () {
                                   Navigator.of(context)
                                       .pop(); // Close the dialog
-                                  Navigator.of(context).popAndPushNamed(
-                                      EventListScreen.screen_id);
+                                  // Navigator.of(context).popAndPushNamed(
+                                  //     EventListScreen.screen_id);
                                 },
                                 child: const Text('OK'),
                               ),

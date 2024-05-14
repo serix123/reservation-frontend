@@ -40,8 +40,10 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
       if (mounted) {
         setState(() {
           lists =
-              Provider.of<EmployeeViewModel>(context, listen: false).approvals;
-          _listValue = ListType.Personal;
+              Provider.of<ApprovalViewModel>(context, listen: false).allApprovals.where((element) =>
+              element.status == "approved")
+                  .toList();
+          _listValue = ListType.All;
           stateLoaded = true;
         });
       }

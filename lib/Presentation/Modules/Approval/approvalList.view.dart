@@ -30,6 +30,7 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
       await Future.wait([
         Provider.of<EmployeeViewModel>(context, listen: false).fetchProfile(),
         Provider.of<ApprovalViewModel>(context, listen: false).fetchApprovals(),
+        Provider.of<ApprovalViewModel>(context, listen: false).fetchAllApproval(),
       ]);
 
       // Use a short delay to simulate a network call (if needed).
@@ -40,7 +41,7 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
         setState(() {
           lists =
               Provider.of<EmployeeViewModel>(context, listen: false).approvals;
-          _listValue = ListType.Self;
+          _listValue = ListType.Personal;
           stateLoaded = true;
         });
       }
@@ -86,7 +87,7 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
                         setState(() {
                           _listValue = newValue;
                           switch (_listValue) {
-                            case ListType.Self:
+                            case ListType.Personal:
                               setState(() {
                                 lists = employeeViewModel.approvals;
                                 itemCount = employeeViewModel.approvals.length;
@@ -99,7 +100,6 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
                                         element.admin_status == 0 ||
                                         element.status == "approved")
                                     .toList();
-                                ;
                                 itemCount =
                                     approvalViewModel.userApproval.length;
                               });
@@ -128,6 +128,15 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
                                     .person_in_charge_approvals.length;
                               });
                               break;
+                            case ListType.All:
+                              setState(() {
+                                lists = approvalViewModel.allApprovals.where((element) =>
+                                    element.status == "approved")
+                                    .toList();
+                                itemCount =
+                                    approvalViewModel.allApprovals.length;
+                              });
+                              // TODO: Handle this case.
                             case null:
                             // TODO: Handle this case.
                           }
@@ -218,7 +227,7 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
                                   )
                                 ],
                               ),
-                              trailing: _listValue != ListType.Self
+                              trailing: _listValue != ListType.Personal || _listValue != ListType.All
                                   ? Row(
                                       mainAxisSize: MainAxisSize.min,
                                       children: item.status == "approved"
@@ -337,7 +346,10 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
                       case null:
                         // TODO: Handle this case.
                         break;
-                      case ListType.Self:
+                      case ListType.Personal:
+                        // TODO: Handle this case.
+                        break;
+                      case ListType.All:
                         // TODO: Handle this case.
                         break;
                       case ListType.ImmediateHead:
@@ -347,7 +359,7 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
                                   listen: false)
                               .fetchProfile();
                           setState(() {
-                            _listValue = ListType.Self;
+                            _listValue = ListType.Personal;
                             lists = Provider.of<EmployeeViewModel>(context,
                                     listen: false)
                                 .approvals;
@@ -361,7 +373,7 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
                                   listen: false)
                               .fetchProfile();
                           setState(() {
-                            _listValue = ListType.Self;
+                            _listValue = ListType.Personal;
                             lists = Provider.of<EmployeeViewModel>(context,
                                     listen: false)
                                 .approvals;
@@ -375,7 +387,7 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
                                   listen: false)
                               .fetchProfile();
                           setState(() {
-                            _listValue = ListType.Self;
+                            _listValue = ListType.Personal;
                             lists = Provider.of<EmployeeViewModel>(context,
                                     listen: false)
                                 .approvals;
@@ -388,7 +400,7 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
                       case null:
                         // TODO: Handle this case.
                         break;
-                      case ListType.Self:
+                      case ListType.Personal:
                         // TODO: Handle this case.
                         break;
                       case ListType.ImmediateHead:
@@ -399,7 +411,7 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
                                   listen: false)
                               .fetchProfile();
                           setState(() {
-                            _listValue = ListType.Self;
+                            _listValue = ListType.Personal;
                             lists = Provider.of<EmployeeViewModel>(context,
                                     listen: false)
                                 .approvals;
@@ -413,7 +425,7 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
                                   listen: false)
                               .fetchProfile();
                           setState(() {
-                            _listValue = ListType.Self;
+                            _listValue = ListType.Personal;
                             lists = Provider.of<EmployeeViewModel>(context,
                                     listen: false)
                                 .approvals;
@@ -427,12 +439,15 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
                                   listen: false)
                               .fetchProfile();
                           setState(() {
-                            _listValue = ListType.Self;
+                            _listValue = ListType.Personal;
                             lists = Provider.of<EmployeeViewModel>(context,
                                     listen: false)
                                 .approvals;
                           });
                         }
+                        break;
+                      case ListType.All:
+                        // TODO: Handle this case.
                         break;
                     }
                   }

@@ -15,6 +15,8 @@ class ApprovalViewModel extends ChangeNotifier{
 
   List<Approval> _userApproval = [];
   List<Approval> get userApproval => _userApproval;
+  List<Approval> _allApprovals = [];
+  List<Approval> get allApprovals => _allApprovals;
 
   Future<void> fetchApprovals() async {
     _isLoading = true;
@@ -24,6 +26,23 @@ class ApprovalViewModel extends ChangeNotifier{
     try {
       List<Approval>? approval = await _apiService.fetchApproval();
       _userApproval = approval ?? [];
+      _errorMessage = '';
+    } catch (e) {
+      _errorMessage = e.toString();
+    } finally {
+      _isLoading = false;
+      print('_isLoading: $_isLoading');
+      notifyListeners();
+    }
+  }
+  Future<void> fetchAllApproval() async {
+    _isLoading = true;
+    print('_isLoading: $_isLoading');
+    notifyListeners();
+
+    try {
+      List<Approval>? approval = await _apiService.fetchAllApproval();
+      _allApprovals = approval ?? [];
       _errorMessage = '';
     } catch (e) {
       _errorMessage = e.toString();

@@ -127,4 +127,4 @@ class Utils {
   }
 }
 
-enum ListType { Self, ImmediateHead, PersonInCharge, Admin }
+enum ListType { Personal, ImmediateHead, PersonInCharge, Admin , All}

@@ -61,7 +61,9 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
   Widget body() {
     return Consumer2<ApprovalViewModel, EmployeeViewModel>(
       builder: (context, approvalViewModel, employeeViewModel, child) {
-        if ((approvalViewModel.isLoading || employeeViewModel.isLoading || !stateLoaded) &&
+        if ((approvalViewModel.isLoading ||
+                employeeViewModel.isLoading ||
+                !stateLoaded) &&
             lists == null) {
           return const Center(child: CircularProgressIndicator());
         }
@@ -93,8 +95,9 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
                             case ListType.Admin:
                               setState(() {
                                 lists = approvalViewModel.userApproval
-                                    .where(
-                                        (element) => element.admin_status == 0)
+                                    .where((element) =>
+                                        element.admin_status == 0 ||
+                                        element.status == "approved")
                                     .toList();
                                 ;
                                 itemCount =
@@ -106,7 +109,8 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
                                 lists = employeeViewModel
                                     .immediate_head_approvals
                                     .where((element) =>
-                                        element.immediate_head_status == 0)
+                                        element.immediate_head_status == 0 ||
+                                        element.status == "approved")
                                     .toList();
                                 itemCount = employeeViewModel
                                     .immediate_head_approvals.length;
@@ -117,7 +121,8 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
                                 lists = employeeViewModel
                                     .person_in_charge_approvals
                                     .where((element) =>
-                                        element.person_in_charge_status == 0)
+                                        element.person_in_charge_status == 0 ||
+                                        element.status == "approved")
                                     .toList();
                                 itemCount = employeeViewModel
                                     .person_in_charge_approvals.length;
@@ -129,11 +134,15 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
                         });
                       },
                       items: ListType.values.map((ListType type) {
-                        bool isAdmin = employeeViewModel.profile?.isAdmin ?? false;
-                        bool facilityNotEmpty = employeeViewModel.profile?.managed_facilities?.isNotEmpty ?? false;
+                        bool isAdmin =
+                            employeeViewModel.profile?.isAdmin ?? false;
+                        bool facilityNotEmpty = employeeViewModel
+                                .profile?.managed_facilities?.isNotEmpty ??
+                            false;
                         return DropdownMenuItem<ListType>(
-                          enabled: (type != ListType.Admin || isAdmin ) &&
-                              (type != ListType.PersonInCharge || facilityNotEmpty) &&
+                          enabled: (type != ListType.Admin || isAdmin) &&
+                              (type != ListType.PersonInCharge ||
+                                  facilityNotEmpty) &&
                               (type != ListType.ImmediateHead ||
                                   employeeViewModel
                                       .immediate_head_approvals.isNotEmpty),
@@ -160,106 +169,138 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
                 ListView(
                   shrinkWrap: true,
                   children: lists?.map((item) {
-                    if (approvalViewModel.isLoading ||
-                        employeeViewModel.isLoading || !stateLoaded) {
-                      return const Center(child: CircularProgressIndicator());
-                    }
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 32.0, vertical: 12),
-                      child: CustomContainer(
-                        child: ListTile(
-                          title: Column(
-                            // mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              GestureDetector(
-                                child: Text(
-                                  "Slip No. - ${item.slip_number}",
-                                  style: TextStyle(
-                                      decoration: TextDecoration.underline,
-                                      fontWeight: FontWeight.w200,
-                                      fontSize: 11,
-                                      color: Colors.deepPurple[400]),
-                                ),
-                                onTap: () {
-                                  var args = ReservationScreenArguments(
-                                      slipNo: item.slip_number,
-                                      type: RequestType.Read);
-                                  Navigator.of(context).pushNamed(
-                                      RouteGenerator.reservationScreen,
-                                      arguments: args);
-                                },
-                              ),
-                              Text(
-                                item.event_details?.event_name ?? "",
-                                style: TextStyle(
-                                    fontWeight: FontWeight.w700,
-                                    fontSize: 18,
-                                    color: Colors.deepPurple[400]),
-                              ),
-                              Text(
-                                item.event_details?.event_description ?? "",
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.normal,
-                                  fontSize: 12,
-                                ),
-                              )
-                            ],
-                          ),
-                          trailing: _listValue != ListType.Self
-                              ? Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: <Widget>[
-                                    // Approve button
-                                    TextButton(
-                                      onPressed: () {
-                                        _showConfirmationDialog(
-                                            item.slip_number!, true);
-                                      },
-                                      child: const Text('Approve'),
-                                      style: TextButton.styleFrom(
-                                          foregroundColor: Colors.green),
+                        if (approvalViewModel.isLoading ||
+                            employeeViewModel.isLoading ||
+                            !stateLoaded) {
+                          return const Center(
+                              child: CircularProgressIndicator());
+                        }
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 32.0, vertical: 12),
+                          child: CustomContainer(
+                            child: ListTile(
+                              title: Column(
+                                // mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  GestureDetector(
+                                    child: Text(
+                                      "Slip No. - ${item.slip_number}",
+                                      style: TextStyle(
+                                          decoration: TextDecoration.underline,
+                                          fontWeight: FontWeight.w200,
+                                          fontSize: 11,
+                                          color: Colors.deepPurple[400]),
                                     ),
-                                    // Reject button
-                                    TextButton(
-                                      onPressed: () {
-                                        _showConfirmationDialog(
-                                            item.slip_number!, false);
-                                      },
-                                      child: const Text('Reject'),
-                                      style: TextButton.styleFrom(
-                                          foregroundColor: Colors.red),
-                                    ),
-                                  ],
-                                )
-                              : IconButton(
-                                  onPressed: () {
-                                    // final pdfFile = await PDFService.generatePDFTest();
-                                    // PdfApi.openFile(pdfFile);
-
-                                    if (item.status == "approved") {
-                                      Navigator.of(context).pushNamed(
-                                          RouteGenerator.approvalDetailsScreen,
-                                          arguments: item.slip_number);
-                                    } else {
+                                    onTap: () {
                                       var args = ReservationScreenArguments(
                                           slipNo: item.slip_number,
                                           type: RequestType.Read);
                                       Navigator.of(context).pushNamed(
                                           RouteGenerator.reservationScreen,
                                           arguments: args);
-                                    }
-                                  },
-                                  icon: Icon(
-                                      item.status == "approved"
-                                          ? Icons.receipt_long_rounded
-                                          : Icons.remove_red_eye_rounded,
-                                      color: kPurpleDark)),
-                        ),
-                      ),
-                    );
-                  }).toList() ?? List.generate(1, (index) => Center(child: Text("Empty List"))),
+                                    },
+                                  ),
+                                  Text(
+                                    item.event_details?.event_name ?? "",
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.w700,
+                                        fontSize: 18,
+                                        color: Colors.deepPurple[400]),
+                                  ),
+                                  Text(
+                                    item.event_details?.event_description ?? "",
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.normal,
+                                      fontSize: 12,
+                                    ),
+                                  )
+                                ],
+                              ),
+                              trailing: _listValue != ListType.Self
+                                  ? Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: item.status == "approved"
+                                          ? [
+                                              IconButton(
+                                                  onPressed: () {
+                                                    // final pdfFile = await PDFService.generatePDFTest();
+                                                    // PdfApi.openFile(pdfFile);
+
+                                                    if (item.status ==
+                                                        "approved") {
+                                                      Navigator.of(context)
+                                                          .pushNamed(
+                                                              RouteGenerator
+                                                                  .approvalDetailsScreen,
+                                                              arguments: item
+                                                                  .slip_number);
+                                                    }
+                                                  },
+                                                  icon: Icon(
+                                                      item.status == "approved"
+                                                          ? Icons
+                                                              .receipt_long_rounded
+                                                          : Icons
+                                                              .remove_red_eye_rounded,
+                                                      color: kPurpleDark))
+                                            ]
+                                          : <Widget>[
+                                              // Approve button
+                                              TextButton(
+                                                onPressed: () {
+                                                  _showConfirmationDialog(
+                                                      item.slip_number!, true);
+                                                },
+                                                child: const Text('Approve'),
+                                                style: TextButton.styleFrom(
+                                                    foregroundColor:
+                                                        Colors.green),
+                                              ),
+                                              // Reject button
+                                              TextButton(
+                                                onPressed: () {
+                                                  _showConfirmationDialog(
+                                                      item.slip_number!, false);
+                                                },
+                                                child: const Text('Reject'),
+                                                style: TextButton.styleFrom(
+                                                    foregroundColor:
+                                                        Colors.red),
+                                              ),
+                                            ],
+                                    )
+                                  : IconButton(
+                                      onPressed: () {
+                                        // final pdfFile = await PDFService.generatePDFTest();
+                                        // PdfApi.openFile(pdfFile);
+
+                                        if (item.status == "approved") {
+                                          Navigator.of(context).pushNamed(
+                                              RouteGenerator
+                                                  .approvalDetailsScreen,
+                                              arguments: item.slip_number);
+                                        } else {
+                                          var args = ReservationScreenArguments(
+                                              slipNo: item.slip_number,
+                                              type: RequestType.Read);
+                                          Navigator.of(context).pushNamed(
+                                              RouteGenerator.reservationScreen,
+                                              arguments: args);
+                                        }
+                                      },
+                                      icon: Icon(
+                                          item.status == "approved"
+                                              ? Icons.receipt_long_rounded
+                                              : Icons.remove_red_eye_rounded,
+                                          color: kPurpleDark)),
+                            ),
+                          ),
+                        );
+                      }).toList() ??
+                      List.generate(
+                          1, (index) => Center(child: Text("Empty List"))),
                 )
             ],
           ),

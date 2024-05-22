@@ -53,11 +53,9 @@ class _ReservationScreenState extends State<ReservationScreen> {
   late TextEditingController _additionalRequirementsController;
 
   DateTime _selectedStartDate = DateTime.now();
-  DateTime _selectedEndDate = DateTime.now()
-      .add(new Duration(days: 7)); // Default end time is 1 hour later
+  DateTime _selectedEndDate = DateTime.now().add(new Duration(days: 7)); // Default end time is 1 hour later
   TimeOfDay _selectedStartTime = TimeOfDay.now();
-  TimeOfDay _selectedEndTime =
-      TimeOfDay(hour: TimeOfDay.now().hour + 1, minute: TimeOfDay.now().minute);
+  TimeOfDay _selectedEndTime = TimeOfDay(hour: TimeOfDay.now().hour + 1, minute: TimeOfDay.now().minute);
 
   Facility? selectedFacility;
   Equipment? selectedEquipment;
@@ -220,31 +218,20 @@ class _ReservationScreenState extends State<ReservationScreen> {
 
   Future<void> initData() async {
     var getEventFuture = widget.args?.slipNo != null
-        ? Provider.of<EventViewModel>(context, listen: false)
-            .fetchEvent(widget.args!.slipNo!)
+        ? Provider.of<EventViewModel>(context, listen: false).fetchEvent(widget.args!.slipNo!)
         : Future.value(null);
     try {
       // Gather all asynchronous operations.
       await Future.wait([
-        Provider.of<EquipmentViewModel>(context, listen: false)
-            .fetchEquipment(),
-        Provider.of<DepartmentViewModel>(context, listen: false)
-            .fetchDepartment(),
-        Provider.of<FacilityViewModel>(context, listen: false)
-            .fetchFacilities(),
-        Provider.of<AuthenticationViewModel>(context, listen: false)
-            .refreshAccessToken(),
-        Provider.of<EmployeeViewModel>(context, listen: false)
-            .fetchProfile()
-            .then((_) {
+        Provider.of<EquipmentViewModel>(context, listen: false).fetchEquipment(),
+        Provider.of<DepartmentViewModel>(context, listen: false).fetchDepartment(),
+        Provider.of<FacilityViewModel>(context, listen: false).fetchFacilities(),
+        Provider.of<AuthenticationViewModel>(context, listen: false).refreshAccessToken(),
+        Provider.of<EmployeeViewModel>(context, listen: false).fetchProfile().then((_) {
           _requesitionerController.text =
               "${Provider.of<EmployeeViewModel>(context, listen: false).profile?.firstName ?? ""} ${Provider.of<EmployeeViewModel>(context, listen: false).profile?.lastName}";
           _departmentController.text =
-              Provider.of<EmployeeViewModel>(context, listen: false)
-                      .profile
-                      ?.departmentDetails
-                      ?.name ??
-                  "";
+              Provider.of<EmployeeViewModel>(context, listen: false).profile?.departmentDetails?.name ?? "";
         }),
         Provider.of<EmployeeViewModel>(context, listen: false).fetchEmployees(),
         getEventFuture,
@@ -257,54 +244,45 @@ class _ReservationScreenState extends State<ReservationScreen> {
       if (mounted) {
         setState(() {
           if (widget.args?.slipNo != null) {
-            event =
-                Provider.of<EventViewModel>(context, listen: false).userEvent!;
+            event = Provider.of<EventViewModel>(context, listen: false).userEvent!;
             _contactNoController.text = event.contact_number!;
             _eventNameController.text = event.event_name!;
             _eventDescriptionController.text = event.event_description!;
-            _participantNumberController.text =
-                event.participants_quantity?.toString() ?? "";
-            _additionalRequirementsController.text =
-                event.additional_needs ?? "";
+            _participantNumberController.text = event.participants_quantity?.toString() ?? "";
+            _additionalRequirementsController.text = event.additional_needs ?? "";
             _selectedStartDate = Utils.extractDateOnly(event.start_time);
             _selectedEndDate = Utils.extractDateOnly(event.end_time);
             _selectedStartTime = Utils.extractTimeOnly(event.start_time);
             _selectedEndTime = Utils.extractTimeOnly(event.end_time);
-            selectedFacility =
-                Provider.of<FacilityViewModel>(context, listen: false)
-                    .facilities
-                    .firstWhereOrNull(
-                        (facility) => facility.id == event.reserved_facility);
+            selectedFacility = Provider.of<FacilityViewModel>(context, listen: false)
+                .facilities
+                .firstWhereOrNull((facility) => facility.id == event.reserved_facility);
             addedEquipments = event.equipments ?? [];
             _fileName = event.file?.split('/').last;
             _requesitionerController.text =
                 '${Provider.of<EmployeeViewModel>(context, listen: false).employees.firstWhere((emp) => emp.id == event.requesitioner).firstName ?? ""} ${Provider.of<EmployeeViewModel>(context, listen: false).employees.firstWhere((emp) => emp.id == event.requesitioner).lastName ?? ""}';
-            var requesitionerDept =
-                Provider.of<EmployeeViewModel>(context, listen: false)
-                    .employees
-                    .firstWhere((emp) => emp.id == event.requesitioner)
-                    .department;
+            var requesitionerDept = Provider.of<EmployeeViewModel>(context, listen: false)
+                .employees
+                .firstWhere((emp) => emp.id == event.requesitioner)
+                .department;
             if (event.department == null) {
-            _departmentController.text =
-                (Provider.of<DepartmentViewModel>(context, listen: false)
-                        .departments
-                        .firstWhere((dept) => dept.id == requesitionerDept)
-                        .name )??
-                    "";
-            }else{
-              _departmentController.text =
-              (Provider.of<DepartmentViewModel>(context, listen: false)
+              _departmentController.text = (Provider.of<DepartmentViewModel>(context, listen: false)
+                      .departments
+                      .firstWhere((dept) => dept.id == requesitionerDept)
+                      .name) ??
+                  "";
+            } else {
+              _departmentController.text = (Provider.of<DepartmentViewModel>(context, listen: false)
                       .departments
                       .firstWhere((dept) => dept.id == event.department)
-                      ?.name) ?? "";
+                      ?.name) ??
+                  "";
             }
           } else {
             event = Event(
                 event_name: "test",
-                start_time: Utils.combineDateTime(
-                    _selectedStartDate, _selectedStartTime),
-                end_time:
-                    Utils.combineDateTime(_selectedEndDate, _selectedEndTime));
+                start_time: Utils.combineDateTime(_selectedStartDate, _selectedStartTime),
+                end_time: Utils.combineDateTime(_selectedEndDate, _selectedEndTime));
           }
           stateLoaded = true;
         });
@@ -318,10 +296,7 @@ class _ReservationScreenState extends State<ReservationScreen> {
   @override
   void initState() {
     super.initState();
-    event = Event(
-        event_name: "event_name",
-        start_time: _selectedStartDate,
-        end_time: _selectedEndDate);
+    event = Event(event_name: "event_name", start_time: _selectedStartDate, end_time: _selectedEndDate);
     _requesitionerController = TextEditingController();
     _departmentController = TextEditingController();
     _contactNoController = TextEditingController();
@@ -333,8 +308,7 @@ class _ReservationScreenState extends State<ReservationScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       initData();
     });
-    Future.microtask(
-        () async => _fileBytes = await Utils.downloadFile(event.file!));
+    Future.microtask(() async => _fileBytes = await Utils.downloadFile(event.file!));
     enabled =
         // widget.args?.slipNo != null &&
         widget.args?.type == RequestType.Read ? false : true;
@@ -358,12 +332,8 @@ class _ReservationScreenState extends State<ReservationScreen> {
 
   Widget body() {
     return Consumer3<EmployeeViewModel, EquipmentViewModel, EventViewModel>(
-        builder: (context, employeeViewModel, equipmentViewModel,
-            eventViewModel, child) {
-      if (equipmentViewModel.isLoading ||
-          employeeViewModel.isLoading ||
-          eventViewModel.isLoading ||
-          !stateLoaded) {
+        builder: (context, employeeViewModel, equipmentViewModel, eventViewModel, child) {
+      if (equipmentViewModel.isLoading || employeeViewModel.isLoading || eventViewModel.isLoading || !stateLoaded) {
         return const Center(child: CircularProgressIndicator());
       }
       return Stack(children: [
@@ -375,8 +345,7 @@ class _ReservationScreenState extends State<ReservationScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text("Requesitioner Details",
-                      style: Theme.of(context).textTheme.titleLarge),
+                  Text("Requesitioner Details", style: Theme.of(context).textTheme.titleLarge),
                   Row(
                     children: [
                       Expanded(
@@ -439,8 +408,7 @@ class _ReservationScreenState extends State<ReservationScreen> {
                   Row(
                     children: [
                       Expanded(
-                        child: Text("Event Details",
-                            style: Theme.of(context).textTheme.titleLarge),
+                        child: Text("Event Details", style: Theme.of(context).textTheme.titleLarge),
                       ),
                       CustomContainer(
                           child: DropdownButton<String>(
@@ -452,8 +420,7 @@ class _ReservationScreenState extends State<ReservationScreen> {
                                 });
                               }
                             : null,
-                        items: <String>['draft', 'application']
-                            .map<DropdownMenuItem<String>>((String value) {
+                        items: <String>['draft', 'application'].map<DropdownMenuItem<String>>((String value) {
                           return DropdownMenuItem<String>(
                             value: value,
                             child: Text(
@@ -520,14 +487,12 @@ class _ReservationScreenState extends State<ReservationScreen> {
                   ),
 
                   const SizedBox(height: 20),
-                  Text("Selected Facility",
-                      style: Theme.of(context).textTheme.titleLarge),
+                  Text("Selected Facility", style: Theme.of(context).textTheme.titleLarge),
                   const SizedBox(height: 20),
                   ElevatedButton(
                     onPressed: enabled ? _showFacilityPicker : null,
-                    child: Text(selectedFacility == null
-                        ? 'Select Facility'
-                        : 'Facility: ${selectedFacility?.name ?? ""}'),
+                    child: Text(
+                        selectedFacility == null ? 'Select Facility' : 'Facility: ${selectedFacility?.name ?? ""}'),
                   ),
                   const SizedBox(height: 20),
                   Text(
@@ -550,23 +515,18 @@ class _ReservationScreenState extends State<ReservationScreen> {
                       const SizedBox(height: 20),
                       // if (_fileBytes != null)
                       //   Image.memory(_fileBytes!, height: 200, errorBuilder: (context, error, stackTrace) => Text("Failed to load image")),
-                      if (_fileName != null)
-                        Expanded(child: Text('File name: $_fileName')),
+                      if (_fileName != null) Expanded(child: Text('File name: $_fileName')),
                     ],
                   ),
                   const SizedBox(height: 20),
-                  Text("Date & Time",
-                      style: Theme.of(context).textTheme.titleLarge),
+                  Text("Date & Time", style: Theme.of(context).textTheme.titleLarge),
                   Row(
                     children: [
                       Expanded(
                         child: ListTile(
                           enabled: enabled,
                           title: const Text("Select Date"),
-                          subtitle: Text(_selectedStartDate
-                              .toLocal()
-                              .toString()
-                              .split(' ')[0]),
+                          subtitle: Text(_selectedStartDate.toLocal().toString().split(' ')[0]),
                           onTap: _pickStartEndDate,
                         ),
                       ),
@@ -574,8 +534,7 @@ class _ReservationScreenState extends State<ReservationScreen> {
                         child: ListTile(
                           enabled: enabled,
                           title: const Text("Select Time Slot"),
-                          subtitle: Text(
-                              "${_selectedStartTime.format(context)} - ${_selectedEndTime.format(context)}"),
+                          subtitle: Text("${_selectedStartTime.format(context)} - ${_selectedEndTime.format(context)}"),
                           onTap: _pickStartEndTime,
                         ),
                       ),
@@ -602,31 +561,24 @@ class _ReservationScreenState extends State<ReservationScreen> {
                   //   ],
                   // ),
                   const SizedBox(height: 20),
-                  Text("Materials & Personnel",
-                      style: Theme.of(context).textTheme.titleLarge),
+                  Text("Materials & Personnel", style: Theme.of(context).textTheme.titleLarge),
                   const SizedBox(height: 10),
                   Column(
                     children: [
                       Row(
                         children: [
                           Expanded(
-                            child: Text('Equipment',
-                                style: Theme.of(context).textTheme.titleMedium),
+                            child: Text('Equipment', style: Theme.of(context).textTheme.titleMedium),
                           ),
                           Expanded(
                             child: Container(
                                 alignment: Alignment.center,
-                                child: Text('Available ',
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .titleMedium)),
+                                child: Text('Available ', style: Theme.of(context).textTheme.titleMedium)),
                           ),
                           Expanded(
                             child: Container(
                               alignment: Alignment.centerLeft,
-                              child: Text('Amount needed',
-                                  style:
-                                      Theme.of(context).textTheme.titleMedium),
+                              child: Text('Amount needed', style: Theme.of(context).textTheme.titleMedium),
                             ),
                           ),
                           const SizedBox(width: 100),
@@ -648,9 +600,8 @@ class _ReservationScreenState extends State<ReservationScreen> {
                                       });
                                     }
                                   : null,
-                              items: equipmentViewModel.equipments
-                                  .map<DropdownMenuItem<Equipment>>(
-                                      (Equipment equipment) {
+                              items:
+                                  equipmentViewModel.equipments.map<DropdownMenuItem<Equipment>>((Equipment equipment) {
                                 return DropdownMenuItem<Equipment>(
                                   value: equipment,
                                   child: Text(
@@ -669,9 +620,8 @@ class _ReservationScreenState extends State<ReservationScreen> {
                           Expanded(
                               child: Container(
                                   alignment: Alignment.center,
-                                  child: Text(selectedEquipment == null
-                                      ? '0'
-                                      : '${selectedEquipment!.equipment_quantity}'))),
+                                  child: Text(
+                                      selectedEquipment == null ? '0' : '${selectedEquipment!.equipment_quantity}'))),
                           // SizedBox(width: 20),
                           Expanded(
                             child: TextFormField(
@@ -689,26 +639,19 @@ class _ReservationScreenState extends State<ReservationScreen> {
                             child: ElevatedButton(
                               onPressed: enabled
                                   ? () {
-                                      if (selectedEquipment != null &&
-                                          _quantityController.text.isNotEmpty) {
-                                        if (int.parse(
-                                                _quantityController.text) >
-                                            selectedEquipment!
-                                                .equipment_quantity) {
+                                      if (selectedEquipment != null && _quantityController.text.isNotEmpty) {
+                                        if (int.parse(_quantityController.text) >
+                                                selectedEquipment!.equipment_quantity ||
+                                            int.parse(_quantityController.text) < 0) {
                                           return;
                                         }
-                                        if (!addedEquipments.any((equipment) =>
-                                            equipment.equipment ==
-                                            (selectedEquipment?.id ?? 0))) {
+                                        if (!addedEquipments
+                                            .any((equipment) => equipment.equipment == (selectedEquipment?.id ?? 0))) {
                                           setState(() {
                                             addedEquipments.add(EventEquipment(
-                                                equipment:
-                                                    selectedEquipment!.id,
-                                                equipment_name:
-                                                    selectedEquipment!
-                                                        .equipment_name,
-                                                quantity: int.parse(
-                                                    _quantityController.text)));
+                                                equipment: selectedEquipment!.id,
+                                                equipment_name: selectedEquipment!.equipment_name,
+                                                quantity: int.parse(_quantityController.text)));
                                           });
                                         }
                                       }
@@ -734,13 +677,10 @@ class _ReservationScreenState extends State<ReservationScreen> {
                                     //
                                     // });
                                   },
-                                  title: Text(
-                                      addedEquipments[index].equipment_name),
-                                  subtitle: Text(
-                                      'Quantity: ${addedEquipments[index].quantity}'),
+                                  title: Text(addedEquipments[index].equipment_name),
+                                  subtitle: Text('Quantity: ${addedEquipments[index].quantity}'),
                                   trailing: IconButton(
-                                    icon: const Icon(Icons.delete,
-                                        color: Colors.red),
+                                    icon: const Icon(Icons.delete, color: Colors.red),
                                     onPressed: enabled
                                         ? () {
                                             // Action to perform on button press
@@ -759,8 +699,7 @@ class _ReservationScreenState extends State<ReservationScreen> {
                     ],
                   ),
                   const SizedBox(height: 20),
-                  Text("Additional Information",
-                      style: Theme.of(context).textTheme.titleLarge),
+                  Text("Additional Information", style: Theme.of(context).textTheme.titleLarge),
                   // Add more form fields for additional information as needed
                   TextFormField(
                     enabled: enabled,
@@ -779,8 +718,7 @@ class _ReservationScreenState extends State<ReservationScreen> {
                             const snackBar = SnackBar(
                               content: Text('Please pick a facility!'),
                             );
-                            ScaffoldMessenger.of(context)
-                                .showSnackBar(snackBar);
+                            ScaffoldMessenger.of(context).showSnackBar(snackBar);
                             return;
                           }
                           if (_formKey.currentState!.validate()) {
@@ -816,18 +754,15 @@ class _ReservationScreenState extends State<ReservationScreen> {
                               }
                             },
                             style: ButtonStyle(
-                              backgroundColor:
-                                  MaterialStateProperty.resolveWith<Color>(
+                              backgroundColor: MaterialStateProperty.resolveWith<Color>(
                                 (Set<MaterialState> states) {
                                   if (states.contains(MaterialState.pressed)) {
-                                    return Colors.red[
-                                        700]!; // Background color when pressed
+                                    return Colors.red[700]!; // Background color when pressed
                                   }
                                   return Colors.red; // Default background color
                                 },
                               ),
-                              overlayColor: MaterialStateProperty.all(
-                                  Colors.red[200]), // Splash color on press
+                              overlayColor: MaterialStateProperty.all(Colors.red[200]), // Splash color on press
                             ),
                             child: Text(
                               "${event.status == 'confirmed' ? 'Cancel' : 'Delete'} Reservation",
@@ -859,8 +794,7 @@ class _ReservationScreenState extends State<ReservationScreen> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return Consumer<EventViewModel>(
-            builder: (context, eventViewModel, child) {
+        return Consumer<EventViewModel>(builder: (context, eventViewModel, child) {
           return AlertDialog(
             title: const Text('Confirm'),
             content: Text(
@@ -874,20 +808,12 @@ class _ReservationScreenState extends State<ReservationScreen> {
                     event.event_name = _eventNameController.text;
                     event.event_description = _eventDescriptionController.text;
                     event.contact_number = _contactNoController.text;
-                    event.additional_needs =
-                        _additionalRequirementsController.text;
+                    event.additional_needs = _additionalRequirementsController.text;
                     event.reserved_facility = selectedFacility?.id;
-                    event.department =
-                        Provider.of<EmployeeViewModel>(context, listen: false)
-                                .profile
-                                ?.department ??
-                            1;
-                    event.participants_quantity =
-                        int.parse(_participantNumberController.text);
-                    event.start_time = Utils.combineDateTime(
-                        _selectedStartDate, _selectedStartTime);
-                    event.end_time = Utils.combineDateTime(
-                        _selectedEndDate, _selectedEndTime);
+                    event.department = Provider.of<EmployeeViewModel>(context, listen: false).profile?.department ?? 1;
+                    event.participants_quantity = int.parse(_participantNumberController.text);
+                    event.start_time = Utils.combineDateTime(_selectedStartDate, _selectedStartTime);
+                    event.end_time = Utils.combineDateTime(_selectedEndDate, _selectedEndTime);
                     event.equipments = addedEquipments;
                     event.status = _statusValue;
                     event.fileUpload = _fileBytes;
@@ -907,8 +833,7 @@ class _ReservationScreenState extends State<ReservationScreen> {
                     case RequestType.Delete:
                       // TODO: Handle this case.
                       if (cancel) {
-                        success = await eventViewModel
-                            .cancelEvent(event.slip_number!);
+                        success = await eventViewModel.cancelEvent(event.slip_number!);
                       } else {
                         success = await eventViewModel.deleteEvent(event.id!);
                       }
@@ -920,8 +845,7 @@ class _ReservationScreenState extends State<ReservationScreen> {
                   }
 
                   if (mounted) {
-                    Navigator.of(context)
-                        .popAndPushNamed(EventListScreen.screen_id);
+                    Navigator.of(context).popAndPushNamed(EventListScreen.screen_id);
                     if (success) {
                       showDialog(
                         context: context,
@@ -932,8 +856,7 @@ class _ReservationScreenState extends State<ReservationScreen> {
                             actions: <Widget>[
                               TextButton(
                                 onPressed: () {
-                                  Navigator.of(context)
-                                      .pop(); // Close the dialog
+                                  Navigator.of(context).pop(); // Close the dialog
                                   // Navigator.of(context).popAndPushNamed(
                                   //     EventListScreen.screen_id);
                                 },
@@ -954,8 +877,7 @@ class _ReservationScreenState extends State<ReservationScreen> {
                             actions: <Widget>[
                               TextButton(
                                 onPressed: () {
-                                  Navigator.of(context)
-                                      .pop(); // Close the dialog
+                                  Navigator.of(context).pop(); // Close the dialog
                                   // Navigator.of(context).popAndPushNamed(
                                   //     EventListScreen.screen_id);
                                 },

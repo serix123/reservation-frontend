@@ -129,10 +129,10 @@ class _DepartmentScreenState extends State<DepartmentScreen> {
                       child: const Text('Add Department'),
                     ),
                     const SizedBox(width: 8),
-                    ElevatedButton(
-                      onPressed: () {},
-                      child: const Text('Add from CSV'),
-                    ),
+                    // ElevatedButton(
+                    //   onPressed: () {},
+                    //   child: const Text('Add from CSV'),
+                    // ),
                     // Add other buttons if needed
                   ],
                 ),

@@ -128,10 +128,10 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
                       child: const Text('Add Employee'),
                     ),
                     const SizedBox(width: 8),
-                    // ElevatedButton(
-                    //   onPressed: () => Navigator.of(context).pushNamed(RouteGenerator.employeeRegisterCSVScreen),
-                    //   child: const Text('Add from CSV'),
-                    // ),
+                    ElevatedButton(
+                      onPressed: () => Navigator.of(context).pushNamed(RouteGenerator.employeeRegisterCSVScreen),
+                      child: const Text('Add from CSV'),
+                    ),
                     // Add other buttons if needed
                   ],
                 ),

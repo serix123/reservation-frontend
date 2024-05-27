@@ -120,6 +120,35 @@ class AuthenticationViewModel extends ChangeNotifier {
     return false;
   }
 
+  Future<bool> registerByCSV(List<RegistrationCredentials> usersData) async {
+    _isLoading = true;
+    _successMessage = '';
+    _errorMessage = '';
+    notifyListeners();
+    try {
+      for (final userData in usersData) {
+        bool registered = await _authService.register(userData);
+        if (registered) {
+          _successMessage += '${userData.email}Registration Success\n ';
+          notifyListeners();
+        } else {
+          _errorMessage = "Registration Fail";
+          notifyListeners();
+        }
+        if(_errorMessage.isNotEmpty){
+          throw Exception("failed to register ${userData.email}");
+        }
+      }
+    } catch (e) {
+      _errorMessage = "Registration error: $e";
+      print(_errorMessage);
+    }finally{
+      _isLoading = false;
+      notifyListeners();
+    }
+    return false;
+  }
+
   Future<void> refreshAccessToken() async {
     bool refreshed = await _authService.refreshAccessToken();
     if (refreshed) {

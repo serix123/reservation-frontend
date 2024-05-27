@@ -141,10 +141,10 @@ class _FacilityScreenState extends State<FacilityScreen> {
                       child: const Text('Add Facilities'),
                     ),
                     const SizedBox(width: 8),
-                    ElevatedButton(
-                      onPressed: () {},
-                      child: const Text('Add from CSV'),
-                    ),
+                    // ElevatedButton(
+                    //   onPressed: () {},
+                    //   child: const Text('Add from CSV'),
+                    // ),
                     // Add other buttons if needed
                   ],
                 ),

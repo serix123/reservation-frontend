@@ -11,6 +11,7 @@ import 'package:online_reservation/Presentation/Modules/Calendar/calendar.view.d
 import 'package:online_reservation/Presentation/Modules/Department/department.view.dart';
 import 'package:online_reservation/Presentation/Modules/Department/departmentUpdate.view.dart';
 import 'package:online_reservation/Presentation/Modules/Employee/employee.view.dart';
+import 'package:online_reservation/Presentation/Modules/Employee/employeeCSV.view.dart';
 import 'package:online_reservation/Presentation/Modules/Employee/employeeRegister.view.dart';
 import 'package:online_reservation/Presentation/Modules/Employee/employeeUpdate.view.dart';
 import 'package:online_reservation/Presentation/Modules/Event/eventList.view.dart';
@@ -31,6 +32,7 @@ class RouteGenerator {
   static const employeeScreen = EmployeesScreen.screen_id;
   static const employeeUpdateScreen = EmployeeEditScreen.screen_id;
   static const employeeRegisterScreen = EmployeeRegisterScreen.screen_id;
+  static const employeeRegisterCSVScreen = EmployeeCSVImportScreen.screen_id;
   static const eventListScreen = EventListScreen.screen_id;
   static const facilityScreen = FacilityScreen.screen_id;
   static const facilityListScreen = FacilitiesListScreen.screen_id;
@@ -81,6 +83,8 @@ class RouteGenerator {
           return MaterialPageRoute(builder: (_) => const EmployeesScreen());
         case employeeRegisterScreen:
           return MaterialPageRoute(builder: (_) => const EmployeeRegisterScreen());
+        case employeeRegisterCSVScreen:
+          return MaterialPageRoute(builder: (_) => const EmployeeCSVImportScreen());
         case employeeUpdateScreen:
           if (args is Employee) {
             return MaterialPageRoute(
@@ -93,14 +97,11 @@ class RouteGenerator {
         case calendarScreen:
           return MaterialPageRoute(builder: (_) => const CalendarScreen());
         case reservationScreen:
-          if (args is ReservationScreenArguments) {
+          if (args is ReservationScreenArguments?) {
             return MaterialPageRoute(
-                builder: (_) => ReservationScreen(
-                      args: args,
-                    ));
-          } else {
-            return _errorRoute();
+            builder: (_) => ReservationScreen(args: args,));
           }
+          return MaterialPageRoute(builder: (_) => const ReservationScreen());
         case facilityScreen:
           return MaterialPageRoute(builder: (_) => const FacilityScreen());
         case facilityListScreen:
@@ -109,8 +110,8 @@ class RouteGenerator {
           if (args is Facility?) {
             return MaterialPageRoute(
                 builder: (_) => FacilityEditScreen(
-                  facility: args,
-                ));
+                      facility: args,
+                    ));
           } else {
             return _errorRoute();
           }

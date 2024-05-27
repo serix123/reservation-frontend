@@ -231,7 +231,16 @@ class _EmployeeRegisterScreenState extends State<EmployeeRegisterScreen> {
                       child: TextFormField(
                         initialValue: _firstName,
                         decoration: const InputDecoration(labelText: 'First Name'),
-                        onSaved: (value) => _firstName = value,
+                        onChanged: (value) {
+                          setState(() {
+                            _firstName = value;
+                            _email = "${value}_${_lastName ?? ""}@southville.edu.ph";
+                          });
+                        },
+                        onSaved: (value) {
+                          _firstName = value;
+                          // _email = "${value}_${_lastName ?? ""}@southville.edu.ph";
+                        },
                       ),
                     ),
                     const SizedBox(
@@ -241,16 +250,25 @@ class _EmployeeRegisterScreenState extends State<EmployeeRegisterScreen> {
                       child: TextFormField(
                         initialValue: _lastName,
                         decoration: const InputDecoration(labelText: 'Last Name'),
-                        onSaved: (value) => _lastName = value,
+                        onSaved: (value) {
+                          _lastName = value;
+                          // _email = "${_firstName}_${value ?? ""}@southville.edu.ph";
+                        },
+                        onChanged: (value) {
+                          setState(() {
+                            _lastName = value;
+                            _email = "${_firstName}_${value ?? ""}@southville.edu.ph";
+                            print(_email);
+                          });
+                        },
                       ),
                     ),
                   ],
                 ),
-                TextFormField(
-                  initialValue: _email,
-                  decoration: const InputDecoration(labelText: 'Email'),
-                  onSaved: (value) => _email = value,
+                const SizedBox(
+                  height: 20,
                 ),
+                Text('Email: ${_email ?? '-'}'),
                 const SizedBox(
                   height: 15,
                 ),

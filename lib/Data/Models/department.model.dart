@@ -19,10 +19,10 @@ class Department {
   }
 
   Map<String, dynamic> toJson() {
-    final map = <String, dynamic>{};
-    map['id'] = id;
-    map['immediate_head'] = immediate_head;
-    map['name'] = name;
-    return map;
+    return {
+      // 'id': id,
+      'name': name,
+      'immediate_head': immediate_head,
+    };
   }
 }

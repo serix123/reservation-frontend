@@ -46,4 +46,49 @@ class ApiService {
     }
     return null;
   }
+
+  Future<Employee?> updateEmployee(Employee employee) async {
+    try {
+      String? token = await storage.read(key: "access");
+      final body = jsonEncode(employee.toJson());
+      final response = await http.patch(
+        Uri.parse('${appURL}employee/update-emp/${employee.id}'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+        body: body
+      );
+      if (response.statusCode == 200) {
+        Employee employee = Employee.fromJson(json.decode(response.body.replaceAll('False', 'false').replaceAll('True', 'true')));
+        return employee;
+      } else {
+        throw Exception('Failed to load employees');
+      }
+    } catch (e) {
+      print('error: $e');
+    }
+    return null;
+  }
+
+  Future<bool> deleteEmployee(Employee employee) async {
+    try {
+      String? token = await storage.read(key: "access");
+      final response = await http.delete(
+        Uri.parse('${authURL}delete/${employee.user}/'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      );
+      if (response.statusCode == 204) {
+        return true;
+      } else {
+        throw Exception('Failed to delete employees');
+      }
+    } catch (e) {
+      print('error: $e');
+    }
+    return false;
+  }
 }

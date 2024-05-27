@@ -49,7 +49,7 @@ class AuthService {
         }),
       );
 
-      if (response.statusCode == 200) {
+      if (response.statusCode == 201) {
         // Assuming the API returns a token upon successful registration
         // final data = jsonDecode(response.body);
         // await storage.write(key: 'token', value: data['token']);

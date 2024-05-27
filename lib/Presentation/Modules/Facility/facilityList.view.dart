@@ -7,17 +7,19 @@ import 'package:online_reservation/Presentation/Modules/Facility/facilityList.vi
 import 'package:online_reservation/Presentation/Modules/Widgets/responsiveLayout.widget.dart';
 import 'package:online_reservation/Presentation/Modules/Widgets/facilityCard.widget.dart';
 
-class FacilitiesScreen extends StatefulWidget {
-  static const screen_id = "/facility";
+class FacilitiesListScreen extends StatefulWidget {
+  static const screen_id = "/facilityList";
 
-  const FacilitiesScreen({super.key});
+  const FacilitiesListScreen({super.key});
 
   @override
-  State<FacilitiesScreen> createState() => _FacilitiesScreenState();
+  State<FacilitiesListScreen> createState() => _FacilitiesListScreenState();
 }
 
-class _FacilitiesScreenState extends State<FacilitiesScreen> {
+class _FacilitiesListScreenState extends State<FacilitiesListScreen> {
   late FacilityViewModel viewmodel;
+
+
 
   Future<void> initData() async {
     try {
@@ -54,7 +56,7 @@ class _FacilitiesScreenState extends State<FacilitiesScreen> {
     return ResponsiveLayout(
       mobileBody: body(),
       desktopBody: body(),
-      currentRoute: FacilitiesScreen.screen_id,
+      currentRoute: FacilitiesListScreen.screen_id,
       title: 'Facilities',
     );
   }

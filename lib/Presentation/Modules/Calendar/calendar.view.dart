@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:online_reservation/Data/Models/event.model.dart';
+import 'package:online_reservation/Presentation/Modules/Employee/employee.viewmodel.dart';
 import 'package:online_reservation/Presentation/Modules/Event/event.viewmodel.dart';
 import 'package:online_reservation/Presentation/Modules/Facility/facilityList.viewmodel.dart';
 import 'package:online_reservation/Presentation/Modules/Widgets/responsiveLayout.widget.dart';
-import 'package:online_reservation/Utils/utils.dart';
 import 'package:online_reservation/config/app.color.dart';
 import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
@@ -60,6 +60,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
       await Future.wait([
         Provider.of<EventViewModel>(context, listen: false).fetchAllEvents(),
         Provider.of<EventViewModel>(context, listen: false).fetchUserEvents(),
+        Provider.of<EmployeeViewModel>(context, listen: false).fetchProfile(),
         Provider.of<FacilityViewModel>(context, listen: false)
             .fetchFacilities(),
       ]);

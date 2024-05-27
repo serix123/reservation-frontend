@@ -73,14 +73,33 @@ class CustomNavigationDrawer extends StatelessWidget {
                           .pushNamed(RouteGenerator.eventListScreen),
                       selected: currentRoute == RouteGenerator.eventListScreen,
                     ),
-                    _createDrawerItem(
-                      context: context,
-                      icon: Icons.business,
-                      text: "Facilities",
-                      onTap: () => Navigator.of(context)
-                          .pushNamed(RouteGenerator.facilityScreen),
-                      selected: currentRoute == RouteGenerator.facilityScreen,
-                    ),
+                    if(employeeViewModel.profile!.isAdmin! )
+                      _createDrawerItem(
+                        context: context,
+                        icon: Icons.business,
+                        text: "Facilities",
+                        onTap: () => Navigator.of(context)
+                            .pushNamed(RouteGenerator.facilityScreen),
+                        selected: currentRoute == RouteGenerator.facilityScreen,
+                      ),
+                    if(employeeViewModel.profile!.isAdmin! )
+                      _createDrawerItem(
+                        context: context,
+                        icon: Icons.business,
+                        text: "Departments",
+                        onTap: () => Navigator.of(context)
+                            .pushNamed(RouteGenerator.departmentScreen),
+                        selected: currentRoute == RouteGenerator.departmentScreen,
+                      ),
+                    if(employeeViewModel.profile!.isAdmin! )
+                      _createDrawerItem(
+                        context: context,
+                        icon: Icons.business,
+                        text: "Register",
+                        onTap: () => Navigator.of(context)
+                            .pushNamed(RouteGenerator.employeeScreen),
+                        selected: currentRoute == RouteGenerator.employeeScreen,
+                      ),
                     // if (hasHeadApproval)
                     //   _createDrawerItem(
                     //     context: context,

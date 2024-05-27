@@ -8,6 +8,9 @@ class FacilityViewModel extends ChangeNotifier {
   List<Facility> _facilities = [];
   List<Facility> get facilities => _facilities;
 
+  Facility? _facility;
+  Facility? get facility => _facility;
+
   bool _isLoading = true;
   bool get isLoading => _isLoading;
 
@@ -22,7 +25,12 @@ class FacilityViewModel extends ChangeNotifier {
   String _errorMessage = '';
   String get errorMessage => _errorMessage;
 
+  String _successMessage = '';
+  String get successMessage => _successMessage;
+
   Future<void> fetchFacilities() async {
+    _successMessage = '';
+    _errorMessage = '';
     _isLoading = true;
     print('_isLoading: $_isLoading');
     notifyListeners();
@@ -36,6 +44,78 @@ class FacilityViewModel extends ChangeNotifier {
     } finally {
       _isLoading = false;
       print('_isLoading: $_isLoading');
+      notifyListeners();
+    }
+  }
+
+  Future<void> updateFacility(Facility facility) async {
+    _isLoading = true;
+    _successMessage = '';
+    _errorMessage = '';
+    print('_profileLoad: $_isLoading');
+    notifyListeners();
+
+    try {
+      _facility = await _apiService.updateFacility(facility);
+      _successMessage = "Facility has been updated";
+      if (_facility == null) {
+        _successMessage = '';
+        _errorMessage = "Facility update has failed";
+      }
+    } catch (e) {
+      _errorMessage = "Facility update has failed";
+      print(_errorMessage);
+    } finally {
+      _isLoading = false;
+      print('_profileLoad: $_isLoading');
+      notifyListeners();
+    }
+  }
+
+  Future<void> createFacility(Facility facility) async {
+    _isLoading = true;
+    _successMessage = '';
+    _errorMessage = '';
+    print('_profileLoad: $_isLoading');
+    notifyListeners();
+
+    try {
+      _facility = await _apiService.createFacility(facility);
+      _successMessage = "Facility has been created";
+      if (_facility == null) {
+        _successMessage = '';
+        _errorMessage = "Facility create has failed";
+      }
+    } catch (e) {
+      _errorMessage = "Facility create has failed";
+      print(_errorMessage);
+    } finally {
+      _isLoading = false;
+      print('_profileLoad: $_isLoading');
+      notifyListeners();
+    }
+  }
+
+  Future<void> deleteFacility(Facility facility) async {
+    _isLoading = true;
+    _successMessage = '';
+    _errorMessage = '';
+    print('_profileLoad: $_isLoading');
+    notifyListeners();
+
+    try {
+      bool response = await _apiService.deleteFacility(facility);
+      _successMessage = "Facility has been deleted";
+      if (!response) {
+        _successMessage = '';
+        _errorMessage = "Facility delete has failed";
+      }
+    } catch (e) {
+      _errorMessage = "Facility delete has failed";
+      print(_errorMessage);
+    } finally {
+      _isLoading = false;
+      print('_profileLoad: $_isLoading');
       notifyListeners();
     }
   }

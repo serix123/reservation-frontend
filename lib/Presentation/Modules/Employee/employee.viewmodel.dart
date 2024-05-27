@@ -16,9 +16,11 @@ class EmployeeViewModel extends ChangeNotifier {
   List<Approval> get person_in_charge_approvals => _person_in_charge_approvals;
 
   // Employee _profile = Employee(id: 1, firstName: "firstName", lastName: "lastName", isAdmin: false);
-  Employee?
-      _profile; // Now it's nullable and won't throw LateInitializationError
+  Employee? _profile; // Now it's nullable and won't throw LateInitializationError
   Employee? get profile => _profile;
+
+  Employee? _updatedEmployee; // Now it's nullable and won't throw LateInitializationError
+  Employee? get updatedEmployee => _updatedEmployee;
 
   EmployeeViewModel() {
     // init();
@@ -35,7 +37,12 @@ class EmployeeViewModel extends ChangeNotifier {
   String _errorMessage = '';
   String get errorMessage => _errorMessage;
 
+  String _successMessage = '';
+  String get successMessage => _successMessage;
+
   Future<void> fetchEmployees() async {
+    _successMessage = '';
+    _errorMessage = '';
     _isLoading = true;
     print('_empLoad: $_isLoading');
     notifyListeners();
@@ -55,6 +62,8 @@ class EmployeeViewModel extends ChangeNotifier {
   }
 
   Future<void> fetchProfile() async {
+    _successMessage = '';
+    _errorMessage = '';
     _isLoading = true;
     print('_profileLoad: $_isLoading');
     notifyListeners();
@@ -72,6 +81,54 @@ class EmployeeViewModel extends ChangeNotifier {
     } finally {
       _isLoading = false;
       print('_profileLoad: $_isLoading');
+      notifyListeners();
+    }
+  }
+
+  Future<void> updateEmployee(Employee employee) async {
+    _isLoading = true;
+    _successMessage = '';
+    _errorMessage = '';
+    print('_profileLoad: $_isLoading');
+    notifyListeners();
+
+    try {
+      _updatedEmployee = await _apiService.updateEmployee(employee);
+      _successMessage = "Employee has been updated";
+      if(_updatedEmployee == null){
+        _successMessage='';
+        _errorMessage = "Employee update has failed";
+      }
+    } catch (e) {
+      _errorMessage = "Employee update has failed";
+      print(_errorMessage);
+      _profile = Employee(id: 1, firstName: "firstName", lastName: "lastName");
+    } finally {
+      _isLoading = false;
+      print('_profileLoad: $_isLoading');
+      notifyListeners();
+    }
+  }
+
+  Future<void> deleteEmployee(Employee employee) async {
+    _isLoading = true;
+    _successMessage = '';
+    _errorMessage = '';
+    print('_profileLoad: $_isLoading');
+    notifyListeners();
+
+    try {
+      bool response = await _apiService.deleteEmployee(employee);
+      _successMessage = "Employee has been deleted";
+      if(!response){
+        _successMessage='';
+        _errorMessage = "Employee delete has failed";
+      }
+    } catch (e) {
+      _errorMessage = "Employee delete has failed";
+      print(_errorMessage);
+    } finally {
+      _isLoading = false;
       notifyListeners();
     }
   }

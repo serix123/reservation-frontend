@@ -37,4 +37,14 @@ class Facility {
     );
   }
 
+  Map<String, dynamic> toJson() {
+    return {
+      // 'id': id,
+      'name': name,
+      'facility_description': facility_description,
+      'department': department,
+      'person_in_charge': person_in_charge,
+    };
+  }
+
 }

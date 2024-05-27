@@ -37,7 +37,7 @@ dependencies:
   flutter_secure_storage: ^9.0.0
   table_calendar: ^3.0.5
   file_picker: ^5.0.0
-
+  csv: ^5.0.0
   widgets_to_image: ^0.0.3
 
   screenshot: ^2.3.0

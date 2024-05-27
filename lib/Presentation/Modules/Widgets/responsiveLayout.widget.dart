@@ -66,7 +66,7 @@ class ResponsiveLayout extends StatelessWidget {
                   Expanded(
                     child: Scaffold(
                       appBar: AppBar(
-                        title: const Text("Home"),
+                        title: Text(title),
                         actions: [
                           IconButton(
                             icon: const Icon(Icons.person),

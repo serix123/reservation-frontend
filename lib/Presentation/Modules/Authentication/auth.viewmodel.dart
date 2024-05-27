@@ -25,12 +25,27 @@ class AuthenticationViewModel extends ChangeNotifier {
   bool _isLoggedIn = false;
   bool get isLoggedIn => _isLoggedIn;
 
+  bool _isLoading = false;
+  bool get isLoading => _isLoading;
+
+  String _errorMessage = '';
+  String get errorMessage => _errorMessage;
+
+
+  String _successMessage = '';
+  String get successMessage => _successMessage;
+
+
+
   AuthenticationViewModel() {
     init();
     _startRefreshTimer();
   }
 
   Future<void> init() async {
+    _isLoading = false;
+    _successMessage = '';
+    _errorMessage = '';
     bool validToken = await validateToken();
     if (!validToken) {
       await refreshAccessToken();
@@ -43,6 +58,10 @@ class AuthenticationViewModel extends ChangeNotifier {
     return token != null && token.isNotEmpty;
   }
 
+  void resetMessage() {
+    _successMessage = '';
+    _errorMessage = '';
+  }
   Future<void> login(String email, String password) async {
     UserCredentials credentials = UserCredentials(email: email,password: password);
     bool loggedIn = await _authService.login(credentials);
@@ -75,6 +94,30 @@ class AuthenticationViewModel extends ChangeNotifier {
       print("Registration error: $e");
       return false;
     }
+  }
+
+  Future<bool> registerByAdmin(RegistrationCredentials credentials) async {
+    _isLoading = true;
+    _successMessage = '';
+    _errorMessage = '';
+    notifyListeners();
+    try {
+      bool registered = await _authService.register(credentials);
+      if (registered) {
+        _successMessage = 'Registration Success';
+        notifyListeners();
+      } else {
+        _errorMessage = "Registration Fail";
+      }
+      return registered;
+    } catch (e) {
+      _errorMessage = "Registration error: $e";
+      print(_errorMessage);
+    }finally{
+      _isLoading = false;
+      notifyListeners();
+    }
+    return false;
   }
 
   Future<void> refreshAccessToken() async {

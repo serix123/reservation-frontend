@@ -73,6 +73,15 @@ class CustomNavigationDrawer extends StatelessWidget {
                           .pushNamed(RouteGenerator.eventListScreen),
                       selected: currentRoute == RouteGenerator.eventListScreen,
                     ),
+                    if(!(employeeViewModel.profile!.isAdmin!) )
+                      _createDrawerItem(
+                        context: context,
+                        icon: Icons.business,
+                        text: "Facilities",
+                        onTap: () => Navigator.of(context)
+                            .pushNamed(RouteGenerator.facilityListScreen),
+                        selected: currentRoute == RouteGenerator.facilityListScreen,
+                      ),
                     if(employeeViewModel.profile!.isAdmin! )
                       _createDrawerItem(
                         context: context,

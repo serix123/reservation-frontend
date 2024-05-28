@@ -23,6 +23,9 @@ class EquipmentViewModel extends ChangeNotifier {
   String _errorMessage = '';
   String get errorMessage => _errorMessage;
 
+  String _successMessage = '';
+  String get successMessage => _successMessage;
+
   Future<void> fetchEquipment() async {
     _isLoading = true;
     print('_eventLoad: $_isLoading');

@@ -39,10 +39,10 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
       // Check if the widget is still mounted before calling setState.
       if (mounted) {
         setState(() {
-          lists =
-              Provider.of<ApprovalViewModel>(context, listen: false).allApprovals.where((element) =>
-              element.status == "approved")
-                  .toList();
+          lists = Provider.of<ApprovalViewModel>(context, listen: false)
+              .allApprovals
+              .where((element) => element.status == "approved")
+              .toList();
           _listValue = ListType.All;
           stateLoaded = true;
         });
@@ -64,10 +64,7 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
   Widget body() {
     return Consumer2<ApprovalViewModel, EmployeeViewModel>(
       builder: (context, approvalViewModel, employeeViewModel, child) {
-        if ((approvalViewModel.isLoading ||
-                employeeViewModel.isLoading ||
-                !stateLoaded) &&
-            lists == null) {
+        if ((approvalViewModel.isLoading || employeeViewModel.isLoading || !stateLoaded) && lists == null) {
           return const Center(child: CircularProgressIndicator());
         }
         return SingleChildScrollView(
@@ -77,8 +74,7 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text("Approval for:",
-                        style: Theme.of(context).textTheme.titleLarge),
+                    Text("Approval for:", style: Theme.of(context).textTheme.titleLarge),
                     const SizedBox(
                       width: 20,
                     ),
@@ -98,69 +94,52 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
                             case ListType.Admin:
                               setState(() {
                                 lists = approvalViewModel.userApproval
-                                    .where((element) =>
-                                        element.admin_status == 0 ||
-                                        element.status == "approved")
+                                    .where((element) => element.admin_status == 0)
                                     .toList();
-                                itemCount =
-                                    approvalViewModel.userApproval.length;
+                                itemCount = approvalViewModel.userApproval.length;
                               });
                               break;
                             case ListType.ImmediateHead:
                               setState(() {
-                                lists = employeeViewModel
-                                    .immediate_head_approvals
-                                    .where((element) =>
-                                        element.immediate_head_status == 0 ||
-                                        element.status == "approved")
+                                lists = employeeViewModel.immediate_head_approvals
+                                    .where(
+                                        (element) => element.immediate_head_status == 0)
                                     .toList();
-                                itemCount = employeeViewModel
-                                    .immediate_head_approvals.length;
+                                itemCount = employeeViewModel.immediate_head_approvals.length;
                               });
                               break;
                             case ListType.PersonInCharge:
                               setState(() {
-                                lists = employeeViewModel
-                                    .person_in_charge_approvals
+                                lists = employeeViewModel.person_in_charge_approvals
                                     .where((element) =>
-                                        element.person_in_charge_status == 0 ||
-                                        element.status == "approved")
+                                        element.person_in_charge_status == 0)
                                     .toList();
-                                itemCount = employeeViewModel
-                                    .person_in_charge_approvals.length;
+                                itemCount = employeeViewModel.person_in_charge_approvals.length;
                               });
                               break;
                             case ListType.All:
                               setState(() {
-                                lists = approvalViewModel.allApprovals.where((element) =>
-                                    element.status == "approved")
+                                lists = approvalViewModel.allApprovals
+                                    .where((element) => element.status == "approved")
                                     .toList();
-                                itemCount =
-                                    approvalViewModel.allApprovals.length;
+                                itemCount = approvalViewModel.allApprovals.length;
                               });
-                              // TODO: Handle this case.
+                            // TODO: Handle this case.
                             case null:
                             // TODO: Handle this case.
                           }
                         });
                       },
                       items: ListType.values.map((ListType type) {
-                        bool isAdmin =
-                            employeeViewModel.profile?.isAdmin ?? false;
-                        bool facilityNotEmpty = employeeViewModel
-                                .profile?.managed_facilities?.isNotEmpty ??
-                            false;
+                        bool isAdmin = employeeViewModel.profile?.isAdmin ?? false;
+                        bool facilityNotEmpty = employeeViewModel.profile?.managed_facilities?.isNotEmpty ?? false;
                         return DropdownMenuItem<ListType>(
                           enabled: (type != ListType.Admin || isAdmin) &&
-                              (type != ListType.PersonInCharge ||
-                                  facilityNotEmpty) &&
-                              (type != ListType.ImmediateHead ||
-                                  employeeViewModel
-                                      .immediate_head_approvals.isNotEmpty),
+                              (type != ListType.PersonInCharge || facilityNotEmpty) &&
+                              (type != ListType.ImmediateHead || employeeViewModel.immediate_head_approvals.isNotEmpty),
                           value: type,
                           child: Text(
-                            Utils.formatEnumString(
-                                type.toString().split('.').last),
+                            Utils.formatEnumString(type.toString().split('.').last),
                             style: TextStyle(
                               color: Colors.deepPurple[400],
                             ),
@@ -180,15 +159,11 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
                 ListView(
                   shrinkWrap: true,
                   children: lists?.map((item) {
-                        if (approvalViewModel.isLoading ||
-                            employeeViewModel.isLoading ||
-                            !stateLoaded) {
-                          return const Center(
-                              child: CircularProgressIndicator());
+                        if (approvalViewModel.isLoading || employeeViewModel.isLoading || !stateLoaded) {
+                          return const Center(child: CircularProgressIndicator());
                         }
                         return Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 32.0, vertical: 12),
+                          padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 12),
                           child: CustomContainer(
                             child: ListTile(
                               title: Column(
@@ -205,20 +180,16 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
                                           color: Colors.deepPurple[400]),
                                     ),
                                     onTap: () {
-                                      var args = ReservationScreenArguments(
-                                          slipNo: item.slip_number,
-                                          type: RequestType.Read);
-                                      Navigator.of(context).pushNamed(
-                                          RouteGenerator.reservationScreen,
-                                          arguments: args);
+                                      var args =
+                                          ReservationScreenArguments(slipNo: item.slip_number, type: RequestType.Read);
+                                      Navigator.of(context)
+                                          .pushNamed(RouteGenerator.reservationScreen, arguments: args);
                                     },
                                   ),
                                   Text(
                                     item.event_details?.event_name ?? "",
                                     style: TextStyle(
-                                        fontWeight: FontWeight.w700,
-                                        fontSize: 18,
-                                        color: Colors.deepPurple[400]),
+                                        fontWeight: FontWeight.w700, fontSize: 18, color: Colors.deepPurple[400]),
                                   ),
                                   Text(
                                     item.event_details?.event_description ?? "",
@@ -229,76 +200,48 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
                                   )
                                 ],
                               ),
-                              trailing: _listValue != ListType.Personal || _listValue != ListType.All
+                              trailing: _listValue != ListType.Personal && _listValue != ListType.All
                                   ? Row(
                                       mainAxisSize: MainAxisSize.min,
                                       children: item.status == "approved"
                                           ? [
                                               IconButton(
                                                   onPressed: () {
-                                                    // final pdfFile = await PDFService.generatePDFTest();
-                                                    // PdfApi.openFile(pdfFile);
-
-                                                    if (item.status ==
-                                                        "approved") {
-                                                      Navigator.of(context)
-                                                          .pushNamed(
-                                                              RouteGenerator
-                                                                  .approvalDetailsScreen,
-                                                              arguments: item
-                                                                  .slip_number);
-                                                    }
+                                                    Navigator.of(context).pushNamed(
+                                                        RouteGenerator.approvalDetailsScreen,
+                                                        arguments: item.slip_number);
                                                   },
-                                                  icon: Icon(
-                                                      item.status == "approved"
-                                                          ? Icons
-                                                              .receipt_long_rounded
-                                                          : Icons
-                                                              .remove_red_eye_rounded,
-                                                      color: kPurpleDark))
+                                                  icon: const Icon(Icons.receipt_long_rounded, color: kPurpleDark))
                                             ]
                                           : <Widget>[
                                               // Approve button
                                               TextButton(
                                                 onPressed: () {
-                                                  _showConfirmationDialog(
-                                                      item.slip_number!, true);
+                                                  _showConfirmationDialog(item.slip_number!, true);
                                                 },
                                                 child: const Text('Approve'),
-                                                style: TextButton.styleFrom(
-                                                    foregroundColor:
-                                                        Colors.green),
+                                                style: TextButton.styleFrom(foregroundColor: Colors.green),
                                               ),
                                               // Reject button
                                               TextButton(
                                                 onPressed: () {
-                                                  _showConfirmationDialog(
-                                                      item.slip_number!, false);
+                                                  _showConfirmationDialog(item.slip_number!, false);
                                                 },
                                                 child: const Text('Reject'),
-                                                style: TextButton.styleFrom(
-                                                    foregroundColor:
-                                                        Colors.red),
+                                                style: TextButton.styleFrom(foregroundColor: Colors.red),
                                               ),
                                             ],
                                     )
                                   : IconButton(
                                       onPressed: () {
-                                        // final pdfFile = await PDFService.generatePDFTest();
-                                        // PdfApi.openFile(pdfFile);
-
                                         if (item.status == "approved") {
-                                          Navigator.of(context).pushNamed(
-                                              RouteGenerator
-                                                  .approvalDetailsScreen,
+                                          Navigator.of(context).pushNamed(RouteGenerator.approvalDetailsScreen,
                                               arguments: item.slip_number);
                                         } else {
                                           var args = ReservationScreenArguments(
-                                              slipNo: item.slip_number,
-                                              type: RequestType.Read);
-                                          Navigator.of(context).pushNamed(
-                                              RouteGenerator.reservationScreen,
-                                              arguments: args);
+                                              slipNo: item.slip_number, type: RequestType.Read);
+                                          Navigator.of(context)
+                                              .pushNamed(RouteGenerator.reservationScreen, arguments: args);
                                         }
                                       },
                                       icon: Icon(
@@ -310,8 +253,7 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
                           ),
                         );
                       }).toList() ??
-                      List.generate(
-                          1, (index) => Center(child: Text("Empty List"))),
+                      List.generate(1, (index) => Center(child: Text("Empty List"))),
                 )
             ],
           ),
@@ -323,22 +265,17 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
   @override
   Widget build(BuildContext context) {
     return ResponsiveLayout(
-        mobileBody: body(),
-        desktopBody: body(),
-        currentRoute: ApprovalScreen.screen_id,
-        title: "Approval List");
+        mobileBody: body(), desktopBody: body(), currentRoute: ApprovalScreen.screen_id, title: "Approval List");
   }
 
   void _showConfirmationDialog(String slipNo, bool approved) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return Consumer<ApprovalViewModel>(
-            builder: (context, approvalViewModel, child) {
+        return Consumer<ApprovalViewModel>(builder: (context, approvalViewModel, child) {
           return AlertDialog(
             title: const Text('Confirm'),
-            content: Text(
-                'Are you sure you want to ${approved ? "approve" : "reject"} this item?'),
+            content: Text('Are you sure you want to ${approved ? "approve" : "reject"} this item?'),
             actions: <Widget>[
               TextButton(
                 onPressed: () async {
@@ -357,42 +294,30 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
                       case ListType.ImmediateHead:
                         // TODO: Handle this case.
                         if (await approvalViewModel.approveByHead(slipNo)) {
-                          await Provider.of<EmployeeViewModel>(context,
-                                  listen: false)
-                              .fetchProfile();
+                          await Provider.of<EmployeeViewModel>(context, listen: false).fetchProfile();
                           setState(() {
                             _listValue = ListType.Personal;
-                            lists = Provider.of<EmployeeViewModel>(context,
-                                    listen: false)
-                                .approvals;
+                            lists = Provider.of<EmployeeViewModel>(context, listen: false).approvals;
                           });
                         }
                         break;
                       case ListType.PersonInCharge:
                         // TODO: Handle this case.
                         if (await approvalViewModel.approveByPIC(slipNo)) {
-                          await Provider.of<EmployeeViewModel>(context,
-                                  listen: false)
-                              .fetchProfile();
+                          await Provider.of<EmployeeViewModel>(context, listen: false).fetchProfile();
                           setState(() {
                             _listValue = ListType.Personal;
-                            lists = Provider.of<EmployeeViewModel>(context,
-                                    listen: false)
-                                .approvals;
+                            lists = Provider.of<EmployeeViewModel>(context, listen: false).approvals;
                           });
                         }
                         break;
                       case ListType.Admin:
                         // TODO: Handle this case.
                         if (await approvalViewModel.approveAdmin(slipNo)) {
-                          await Provider.of<EmployeeViewModel>(context,
-                                  listen: false)
-                              .fetchProfile();
+                          await Provider.of<EmployeeViewModel>(context, listen: false).fetchProfile();
                           setState(() {
                             _listValue = ListType.Personal;
-                            lists = Provider.of<EmployeeViewModel>(context,
-                                    listen: false)
-                                .approvals;
+                            lists = Provider.of<EmployeeViewModel>(context, listen: false).approvals;
                           });
                         }
                         break;
@@ -409,42 +334,30 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
                         // TODO: Handle this case.
                         print("rejecting");
                         if (await approvalViewModel.rejectByHead(slipNo)) {
-                          await Provider.of<EmployeeViewModel>(context,
-                                  listen: false)
-                              .fetchProfile();
+                          await Provider.of<EmployeeViewModel>(context, listen: false).fetchProfile();
                           setState(() {
                             _listValue = ListType.Personal;
-                            lists = Provider.of<EmployeeViewModel>(context,
-                                    listen: false)
-                                .approvals;
+                            lists = Provider.of<EmployeeViewModel>(context, listen: false).approvals;
                           });
                         }
                         break;
                       case ListType.PersonInCharge:
                         // TODO: Handle this case.
                         if (await approvalViewModel.rejectByPIC(slipNo)) {
-                          await Provider.of<EmployeeViewModel>(context,
-                                  listen: false)
-                              .fetchProfile();
+                          await Provider.of<EmployeeViewModel>(context, listen: false).fetchProfile();
                           setState(() {
                             _listValue = ListType.Personal;
-                            lists = Provider.of<EmployeeViewModel>(context,
-                                    listen: false)
-                                .approvals;
+                            lists = Provider.of<EmployeeViewModel>(context, listen: false).approvals;
                           });
                         }
                         break;
                       case ListType.Admin:
                         // TODO: Handle this case.
                         if (await approvalViewModel.rejectAdmin(slipNo)) {
-                          await Provider.of<EmployeeViewModel>(context,
-                                  listen: false)
-                              .fetchProfile();
+                          await Provider.of<EmployeeViewModel>(context, listen: false).fetchProfile();
                           setState(() {
                             _listValue = ListType.Personal;
-                            lists = Provider.of<EmployeeViewModel>(context,
-                                    listen: false)
-                                .approvals;
+                            lists = Provider.of<EmployeeViewModel>(context, listen: false).approvals;
                           });
                         }
                         break;
@@ -453,8 +366,7 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
                         break;
                     }
                   }
-                  Navigator.of(context)
-                      .popAndPushNamed(ApprovalScreen.screen_id);
+                  Navigator.of(context).popAndPushNamed(ApprovalScreen.screen_id);
                 },
                 child: const Text('Yes'),
               ),

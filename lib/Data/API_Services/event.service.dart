@@ -24,8 +24,7 @@ class EventAPIService {
       );
       if (response.statusCode == 200) {
         List<dynamic> body = json.decode(response.body);
-        List<Event> events =
-            body.map((dynamic item) => Event.fromJson(item)).toList();
+        List<Event> events = body.map((dynamic item) => Event.fromJson(item)).toList();
         return events;
       } else {
         throw Exception('Failed to load events');
@@ -48,9 +47,7 @@ class EventAPIService {
       );
       if (response.statusCode == 200) {
         List<dynamic> body = json.decode(response.body);
-        print(body);
-        List<Event> events =
-            body.map((dynamic item) => Event.fromJson(item)).toList();
+        List<Event> events = body.map((dynamic item) => Event.fromJson(item)).toList();
         return events;
       } else {
         throw Exception('Failed to load user events');
@@ -73,9 +70,8 @@ class EventAPIService {
       );
       if (response.statusCode == 200) {
         List<dynamic> body = json.decode(response.body) as List;
-        print(body);
         Map<String, dynamic> firstItem;
-        if(body.isNotEmpty){
+        if (body.isNotEmpty) {
           firstItem = body[0];
           Event event = Event.fromJson(firstItem);
           return event;
@@ -101,8 +97,8 @@ class EventAPIService {
       );
       if (response.statusCode == 200) {
         var body = json.decode(response.body);
-        print(body);
-        var responseObj= {'status':body['status']};
+        // print(body);
+        var responseObj = {'status': body['status']};
         print('status: ${responseObj['status']}');
         return true;
       } else {
@@ -113,6 +109,7 @@ class EventAPIService {
     }
     return false;
   }
+
   Future<bool> deleteEvent(int id) async {
     try {
       String? token = await storage.read(key: "access");
@@ -138,7 +135,7 @@ class EventAPIService {
   Future<bool> registerEvent(Event event) async {
     String? token = await storage.read(key: "access");
 
-      // Add JSON data part
+    // Add JSON data part
     try {
       var uri = Uri.parse('${appURL}event/');
       var request = http.MultipartRequest('POST', uri);
@@ -148,7 +145,7 @@ class EventAPIService {
         // Determine the content type based on the file extension
         MediaType contentType = Utils.determineMediaType(event.fileName!);
         // Add file part
-        request.files.add( http.MultipartFile.fromBytes(
+        request.files.add(http.MultipartFile.fromBytes(
           'event_file',
           event.fileUpload!,
           filename: event.fileName!,
@@ -157,7 +154,6 @@ class EventAPIService {
         ));
       }
 
-      print(request);
       final response = await request.send();
       if (response.statusCode == 201) {
         print("Data and image uploaded successfully.");
@@ -166,8 +162,7 @@ class EventAPIService {
         print(responseData);
         return true;
       } else {
-        print(
-            "Failed to upload data and image. Status code: ${response.statusCode}");
+        print("Failed to upload data and image. Status code: ${response.statusCode}");
         // Optionally, read and print the response body
         var responseData = await response.stream.bytesToString();
         print(responseData);
@@ -182,7 +177,7 @@ class EventAPIService {
   Future<bool> updateEvent(Event event) async {
     String? token = await storage.read(key: "access");
 
-      // Add JSON data part
+    // Add JSON data part
     try {
       // var uri = Uri.parse('${appURL}event/?slip_number=${event.slip_number}');
       // var uri = Uri.parse('${appURL}event/${event.id}/');
@@ -194,7 +189,7 @@ class EventAPIService {
         // Determine the content type based on the file extension
         MediaType contentType = Utils.determineMediaType(event.fileName!);
         // Add file part
-        request.files.add( http.MultipartFile.fromBytes(
+        request.files.add(http.MultipartFile.fromBytes(
           'event_file',
           event.fileUpload!,
           filename: event.fileName!,
@@ -213,8 +208,7 @@ class EventAPIService {
         print(responseData);
         return true;
       } else {
-        print(
-            "Failed to upload data and image. Status code: ${response.statusCode}");
+        print("Failed to upload data and image. Status code: ${response.statusCode}");
         // Optionally, read and print the response body
         var responseData = await response.stream.bytesToString();
         print(responseData);

@@ -11,6 +11,34 @@ class UserCredentials {
     'password': password,
   };
 }
+class UserUpdateDetails {
+
+  int? id;
+  String? email;
+  String? password;
+  String? first_name;
+  String? last_name;
+  UserUpdateDetails({this.id,this.email, this.password, this.first_name, this.last_name});
+
+  Map<String, String> toJson() {
+    final Map<String, String> data = {};
+
+    if (email != null) {
+      data['email'] = email!;
+    }
+    if (password != null) {
+      data['password'] = password!;
+    }
+    if (first_name != null) {
+      data['first_name'] = first_name!;
+    }
+    if (last_name != null) {
+      data['last_name'] = last_name!;
+    }
+
+    return data;
+  }
+}
 class RegistrationCredentials {
 
   String first_name;

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:online_reservation/Data/Models/auth.model.dart';
 import 'package:online_reservation/Data/Models/employee.model.dart';
+import 'package:online_reservation/Presentation/Modules/Authentication/auth.viewmodel.dart';
 import 'package:online_reservation/Presentation/Modules/Department/department.viewmodel.dart';
 import 'package:online_reservation/Presentation/Modules/Employee/employee.viewmodel.dart';
 import 'package:online_reservation/Presentation/Modules/Widgets/message.widget.dart';
@@ -21,6 +23,7 @@ class _EmployeeEditScreenState extends State<EmployeeEditScreen> {
   late int? _id;
   late String? _firstName;
   late String? _lastName;
+  late String? _email;
   late int? _head;
   late int? _departmentId;
   String? _departmentName = '';
@@ -33,6 +36,7 @@ class _EmployeeEditScreenState extends State<EmployeeEditScreen> {
     _id = widget.employee.id;
     _firstName = widget.employee.firstName;
     _lastName = widget.employee.lastName;
+    _email = widget.employee.email;
     _head = widget.employee.immediateHead;
     _departmentId = widget.employee.department;
   }
@@ -48,10 +52,13 @@ class _EmployeeEditScreenState extends State<EmployeeEditScreen> {
       id: _id!,
       firstName: _firstName ?? "",
       lastName: _lastName ?? "",
+      email: _email,
       department: _departmentId,
       immediateHead: _head,
     );
+    final updateDetails = UserUpdateDetails(id:widget.employee.user!, email: _email,first_name: _firstName,last_name: _lastName);
     await Provider.of<EmployeeViewModel>(context, listen: false).updateEmployee(employee);
+    await Provider.of<AuthenticationViewModel>(context, listen: false).updateByAdmin(updateDetails);
     Employee? response = Provider.of<EmployeeViewModel>(context, listen: false).updatedEmployee;
     setState(() {
       _id = response?.id;
@@ -227,6 +234,12 @@ class _EmployeeEditScreenState extends State<EmployeeEditScreen> {
                         initialValue: _firstName,
                         decoration: const InputDecoration(labelText: 'First Name'),
                         onSaved: (value) => _firstName = value,
+                        onChanged: (value) {
+                          setState(() {
+                            _firstName = value;
+                            _email = "${value}_${_lastName ?? ""}@southville.edu.ph";
+                          });
+                        },
                       ),
                     ),
                     const SizedBox(
@@ -237,10 +250,21 @@ class _EmployeeEditScreenState extends State<EmployeeEditScreen> {
                         initialValue: _lastName,
                         decoration: const InputDecoration(labelText: 'Last Name'),
                         onSaved: (value) => _lastName = value,
+                        onChanged: (value) {
+                          setState(() {
+                            _lastName = value;
+                            _email = "${_firstName}_${value ?? ""}@southville.edu.ph";
+                            print(_email);
+                          });
+                        },
                       ),
                     ),
                   ],
                 ),
+                const SizedBox(
+                  height: 20,
+                ),
+                Text('Email: ${_email ?? '-'}'),
                 const SizedBox(
                   height: 15,
                 ),

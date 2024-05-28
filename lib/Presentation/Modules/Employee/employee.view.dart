@@ -22,6 +22,7 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
   Future<void> fetchDataFromAPI() async {
     try {
       // Gather all asynchronous operations.
+      Provider.of<AuthenticationViewModel>(context, listen: false).resetMessage();
       await Future.wait([
         Provider.of<DepartmentViewModel>(context, listen: false).fetchDepartment(),
         Provider.of<EmployeeViewModel>(context, listen: false).fetchProfile(),
@@ -53,7 +54,11 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
   void _updateEmployee(BuildContext context, Employee employee) {
     Navigator.of(context).pushNamed(RouteGenerator.employeeUpdateScreen, arguments: employee).then((_) {
       // Handle any updates or state changes after returning from the edit screen
-      setState(() {});
+      setState(() {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          fetchDataFromAPI();
+        });
+      });
     });
   }
 
@@ -74,9 +79,13 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
             TextButton(
               onPressed: () async {
                 await Provider.of<EmployeeViewModel>(context, listen: false).deleteEmployee(employee);
-                setState(() {
-                });
+                // setState(() {});
                 await Provider.of<EmployeeViewModel>(context, listen: false).fetchEmployees();
+                // await Future.wait([
+                //   Provider.of<EmployeeViewModel>(context, listen: false).deleteEmployee(employee),
+                //   Provider.of<EmployeeViewModel>(context, listen: false).fetchEmployees(),
+                // await Future.delayed(Duration(seconds: 1));
+                // ]);
                 Navigator.of(context).pop();
               },
               child: Text('Delete'),
@@ -88,6 +97,16 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
         );
       },
     );
+  }
+
+  void _addEmployee() {
+    Navigator.of(context).pushNamed(RouteGenerator.employeeRegisterScreen).then(
+          (_) => setState(() {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              fetchDataFromAPI();
+            });
+          }),
+        );
   }
 
   @override
@@ -124,7 +143,7 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     ElevatedButton(
-                      onPressed: () => Navigator.of(context).pushNamed(RouteGenerator.employeeRegisterScreen),
+                      onPressed: _addEmployee,
                       child: const Text('Add Employee'),
                     ),
                     const SizedBox(width: 8),
@@ -142,15 +161,29 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
                       DataColumn(label: Text('ID')),
                       DataColumn(label: Text('Name')),
                       DataColumn(label: Text('Immediate Head')),
+                      DataColumn(label: Text('Email')),
                       DataColumn(label: Text('Department Name')),
                       DataColumn(label: Text('Department ID')),
                       DataColumn(label: Text('Actions')),
                     ],
                     rows: employeeViewModel.employees.map((employee) {
+                      Employee? empHead;
+                      if (employee.immediateHead != null) {
+                        empHead = employeeViewModel.employees.firstWhere(
+                            (element) => employee.immediateHead == null ? false : element.id == employee.immediateHead,
+                            orElse: () => Employee(id: 999, firstName: "", lastName: ""));
+                      } else {
+                        empHead = null;
+                      }
                       return DataRow(cells: [
                         DataCell(Text(employee.id.toString() ?? '-')),
                         DataCell(Text('${employee.firstName} ${employee.lastName}')),
-                        DataCell(Text(employee.immediateHead?.toString() ?? '-')),
+                        // DataCell(Text(employee.immediateHead?.toString() ?? '-')),
+                        DataCell(
+                          Text(
+                              "${employee.immediateHead != null ? (empHead?.firstName ?? "") : ""} ${employee.immediateHead != null ? (empHead?.lastName ?? "") : ""} (${employee.immediateHead?.toString() ?? '-'})"),
+                        ),
+                        DataCell(Text(employee.email ?? '-')),
                         DataCell(Text(employee.departmentDetails?.name ?? '-')),
                         DataCell(Text(employee.department?.toString() ?? '-')),
                         DataCell(

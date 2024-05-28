@@ -18,6 +18,12 @@ class   DepartmentViewModel extends ChangeNotifier {
   bool _isLoading = true;
   bool get isLoading => _isLoading;
 
+  String _errorMessage = '';
+  String get errorMessage => _errorMessage;
+
+  String _successMessage = '';
+  String get successMessage => _successMessage;
+
   DepartmentViewModel() {
     // init();
   }
@@ -26,15 +32,13 @@ class   DepartmentViewModel extends ChangeNotifier {
     await fetchDepartment();
   }
 
-  String _errorMessage = '';
-  String get errorMessage => _errorMessage;
-
-  String _successMessage = '';
-  String get successMessage => _successMessage;
-
-  Future<void> fetchDepartment() async {
+  void resetMessage() {
     _successMessage = '';
     _errorMessage = '';
+    notifyListeners();
+  }
+
+  Future<void> fetchDepartment() async {
     _isLoading = true;
     print('_isLoading: $_isLoading');
     notifyListeners();

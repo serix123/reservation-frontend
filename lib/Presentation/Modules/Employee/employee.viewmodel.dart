@@ -30,6 +30,11 @@ class EmployeeViewModel extends ChangeNotifier {
     await fetchEmployees();
     await fetchProfile();
   }
+  void resetMessage() {
+    _successMessage = '';
+    _errorMessage = '';
+    notifyListeners();
+  }
 
   bool _isLoading = true;
   bool get isLoading => _isLoading;
@@ -41,8 +46,8 @@ class EmployeeViewModel extends ChangeNotifier {
   String get successMessage => _successMessage;
 
   Future<void> fetchEmployees() async {
-    _successMessage = '';
-    _errorMessage = '';
+    // _successMessage = '';
+    // _errorMessage = '';
     _isLoading = true;
     print('_empLoad: $_isLoading');
     notifyListeners();

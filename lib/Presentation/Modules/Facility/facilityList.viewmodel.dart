@@ -28,9 +28,13 @@ class FacilityViewModel extends ChangeNotifier {
   String _successMessage = '';
   String get successMessage => _successMessage;
 
-  Future<void> fetchFacilities() async {
+  void resetMessage() {
     _successMessage = '';
     _errorMessage = '';
+    notifyListeners();
+  }
+
+  Future<void> fetchFacilities() async {
     _isLoading = true;
     print('_isLoading: $_isLoading');
     notifyListeners();

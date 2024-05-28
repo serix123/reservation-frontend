@@ -32,6 +32,29 @@ class AuthService {
       return false;
     }
   }
+  Future<bool> update(UserUpdateDetails updateDetails) async {
+    try {
+      String? token = await storage.read(key: "access");
+      final response = await http.patch(
+        Uri.parse('${authURL}update/${updateDetails.id}/'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(updateDetails.toJson()),
+      );
+      if (response.statusCode == 200) {
+        return true;
+        // return TokenResponse.fromJson(response.body);
+      } else {
+        print('Failed to authenticate: ${response.body}');
+        return false;
+      }
+    } catch (e) {
+      print('Exception when calling authenticate: $e');
+      return false;
+    }
+  }
 
   Future<bool> register(RegistrationCredentials credentials) async {
     try {

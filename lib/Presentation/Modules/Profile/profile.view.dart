@@ -1,5 +1,6 @@
 
 import 'package:flutter/material.dart';
+import 'package:online_reservation/Presentation/route/route.generator.dart';
 import 'package:provider/provider.dart';
 
 import 'package:online_reservation/Presentation/Modules/Employee/employee.viewmodel.dart';
@@ -22,6 +23,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   }
 
+  void _changePassword() {
+    Navigator.of(context).pushNamed(RouteGenerator.changePassword).then((_) {
+      setState(() {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          Future.microtask(() => Provider.of<EmployeeViewModel>(context, listen: false)
+              .fetchProfile());
+        });
+      });
+    });
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return ResponsiveLayout(
@@ -38,7 +51,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         return const Center(child: CircularProgressIndicator());
       }
       return Container(
-        padding: EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
@@ -46,10 +59,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
               "Profile Details",
               style: Theme.of(context).textTheme.titleLarge,
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             _profileDetailField("First Name", viewModel.profile?.firstName ?? ""),
             _profileDetailField("Last Name", viewModel.profile?.lastName ?? ""),
+            _profileDetailField("Email Address", viewModel.profile?.email ?? ""),
             _profileDetailField("Department", viewModel.profile?.departmentDetails?.name ?? ""),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: _changePassword,
+              child: const Text('Update'),
+            ),
           ],
         ),
       );
@@ -65,14 +84,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
         children: [
           Text(
             label,
-            style: TextStyle(
+            style: const TextStyle(
               color: Colors.black54,
               fontSize: 16,
             ),
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           Container(
-            padding: EdgeInsets.all(8.0),
+            padding: const EdgeInsets.all(8.0),
             width: double.infinity,
             decoration: BoxDecoration(
               color: Colors.grey[200],
@@ -80,7 +99,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             child: Text(
               value,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 16,
                 color: Colors.black87,
               ),

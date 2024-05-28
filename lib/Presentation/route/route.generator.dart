@@ -18,6 +18,7 @@ import 'package:online_reservation/Presentation/Modules/Event/eventList.view.dar
 import 'package:online_reservation/Presentation/Modules/Facility/facility.view.dart';
 import 'package:online_reservation/Presentation/Modules/Facility/facilityList.view.dart';
 import 'package:online_reservation/Presentation/Modules/Facility/facilityUpdate.view.dart';
+import 'package:online_reservation/Presentation/Modules/Profile/changePassword.view.dart';
 import 'package:online_reservation/Presentation/Modules/Profile/profile.view.dart';
 import 'package:online_reservation/Presentation/Modules/Reservation/reservation.view.dart';
 import 'package:online_reservation/main.dart';
@@ -40,6 +41,7 @@ class RouteGenerator {
   static const homeScreen = MyHomePage.screen_id;
   static const loginScreen = LoginScreen.screen_id;
   static const profileScreen = ProfileScreen.screen_id;
+  static const changePassword = ChangePasswordScreen.screen_id;
   static const registerScreen = RegistrationScreen.screen_id;
   static const reservationScreen = ReservationScreen.screen_id;
 
@@ -117,6 +119,8 @@ class RouteGenerator {
           }
         case profileScreen:
           return MaterialPageRoute(builder: (_) => ProfileScreen());
+        case changePassword:
+          return MaterialPageRoute(builder: (_) => const ChangePasswordScreen());
         case approvalListScreen:
           return MaterialPageRoute(builder: (_) => const ApprovalScreen());
         case loginScreen:

@@ -18,10 +18,46 @@ class DepartmentScreen extends StatefulWidget {
 }
 
 class _DepartmentScreenState extends State<DepartmentScreen> {
+
+  Future<void> fetchDataFromAPI() async {
+    try {
+      // Gather all asynchronous operations.
+      Provider.of<DepartmentViewModel>(context, listen: false).resetMessage();
+      await Future.wait([
+        Provider.of<DepartmentViewModel>(context, listen: false).fetchDepartment(),
+        Provider.of<EmployeeViewModel>(context, listen: false).fetchProfile(),
+        Provider.of<EmployeeViewModel>(context, listen: false).fetchEmployees(),
+      ]);
+
+      // Use a short delay to simulate a network call (if needed).
+      await Future.delayed(const Duration(seconds: 1));
+
+      // Check if the widget is still mounted before calling setState.
+      if (mounted) {
+        setState(() {});
+      }
+    } catch (error) {
+      // Handle or log errors
+      print('Error fetching data: $error');
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      fetchDataFromAPI();
+    });
+  }
+
   void _updateDepartment(BuildContext context, Department department) {
     Navigator.of(context).pushNamed(RouteGenerator.departmentUpdateScreen, arguments: department).then((_) {
       // Handle any updates or state changes after returning from the edit screen
-      setState(() {});
+      setState(() {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          fetchDataFromAPI();
+        });
+      });
     });
   }
 
@@ -55,34 +91,14 @@ class _DepartmentScreenState extends State<DepartmentScreen> {
     );
   }
 
-  Future<void> fetchDataFromAPI() async {
-    try {
-      // Gather all asynchronous operations.
-      await Future.wait([
-        Provider.of<DepartmentViewModel>(context, listen: false).fetchDepartment(),
-        Provider.of<EmployeeViewModel>(context, listen: false).fetchProfile(),
-        Provider.of<EmployeeViewModel>(context, listen: false).fetchEmployees(),
-      ]);
-
-      // Use a short delay to simulate a network call (if needed).
-      await Future.delayed(const Duration(seconds: 1));
-
-      // Check if the widget is still mounted before calling setState.
-      if (mounted) {
-        setState(() {});
-      }
-    } catch (error) {
-      // Handle or log errors
-      print('Error fetching data: $error');
-    }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      fetchDataFromAPI();
-    });
+  void _addDepartment() {
+    Navigator.of(context).pushNamed(RouteGenerator.departmentUpdateScreen).then(
+          (_) => setState(() {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          fetchDataFromAPI();
+        });
+      }),
+    );
   }
 
   @override
@@ -108,82 +124,85 @@ class _DepartmentScreenState extends State<DepartmentScreen> {
           return Center(child: Text(employeeViewModel.errorMessage));
         }
         return SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (departmentViewModel.successMessage.isNotEmpty)
-                SuccessMessage(
-                  message: departmentViewModel.successMessage,
-                ),
-              if (departmentViewModel.errorMessage.isNotEmpty)
-                ErrorMessage(
-                  message: departmentViewModel.errorMessage,
-                ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    ElevatedButton(
-                      onPressed: () => Navigator.of(context).pushNamed(RouteGenerator.departmentUpdateScreen),
-                      child: const Text('Add Department'),
-                    ),
-                    const SizedBox(width: 8),
-                    // ElevatedButton(
-                    //   onPressed: () {},
-                    //   child: const Text('Add from CSV'),
-                    // ),
-                    // Add other buttons if needed
-                  ],
-                ),
-              ),
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: DataTable(
-                  columns: const [
-                    DataColumn(label: Text('ID')),
-                    DataColumn(label: Text('Name')),
-                    DataColumn(label: Text('Immediate Head')),
-                    DataColumn(label: Text('Actions')),
-                  ],
-                  rows: List.generate(departmentViewModel.departments.length, (index) {
-                    final department = departmentViewModel.departments[index];
-                    Employee? employee;
-                    if (department.immediate_head != null) {
-                      employee = employeeViewModel.employees.firstWhere(
-                          (element) =>
-                              department.immediate_head == null ? false : element.id == department.immediate_head,
-                          orElse: () => Employee(id: 999, firstName: "", lastName: ""));
-                    } else {
-                      employee = null;
-                    }
-                    return DataRow(cells: [
-                      DataCell(Text(department.id.toString() ?? '-')),
-                      DataCell(Text(department.name ?? '-')),
-                      DataCell(
-                        Text(
-                            "${department.immediate_head != null ? (employee?.firstName ?? "") : ""} ${department.immediate_head != null ? (employee?.lastName ?? "") : ""} (${department.immediate_head?.toString() ?? '-'})"),
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (departmentViewModel.successMessage.isNotEmpty)
+                  SuccessMessage(
+                    message: departmentViewModel.successMessage,
+                  ),
+                if (departmentViewModel.errorMessage.isNotEmpty)
+                  ErrorMessage(
+                    message: departmentViewModel.errorMessage,
+                  ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      ElevatedButton(
+                        onPressed: _addDepartment,
+                        child: const Text('Add Department'),
                       ),
-                      DataCell(
-                        Row(
-                          children: [
-                            ElevatedButton(
-                              onPressed: () => _updateDepartment(context, department),
-                              child: const Text('Update'),
-                            ),
-                            const SizedBox(width: 8),
-                            DeleteButton(
-                              text: "Delete",
-                              onPressed: () => _deleteDepartment(department),
-                            ),
-                          ],
+                      const SizedBox(width: 8),
+                      // ElevatedButton(
+                      //   onPressed: () {},
+                      //   child: const Text('Add from CSV'),
+                      // ),
+                      // Add other buttons if needed
+                    ],
+                  ),
+                ),
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: DataTable(
+                    columns: const [
+                      DataColumn(label: Text('ID')),
+                      DataColumn(label: Text('Name')),
+                      DataColumn(label: Text('Immediate Head')),
+                      DataColumn(label: Text('Actions')),
+                    ],
+                    rows: List.generate(departmentViewModel.departments.length, (index) {
+                      final department = departmentViewModel.departments[index];
+                      Employee? employee;
+                      if (department.immediate_head != null) {
+                        employee = employeeViewModel.employees.firstWhere(
+                            (element) =>
+                                department.immediate_head == null ? false : element.id == department.immediate_head,
+                            orElse: () => Employee(id: 999, firstName: "", lastName: ""));
+                      } else {
+                        employee = null;
+                      }
+                      return DataRow(cells: [
+                        DataCell(Text(department.id.toString() ?? '-')),
+                        DataCell(Text(department.name ?? '-')),
+                        DataCell(
+                          Text(
+                              "${department.immediate_head != null ? (employee?.firstName ?? "") : ""} ${department.immediate_head != null ? (employee?.lastName ?? "") : ""} (${department.immediate_head?.toString() ?? '-'})"),
                         ),
-                      ),
-                    ]);
-                  }),
+                        DataCell(
+                          Row(
+                            children: [
+                              ElevatedButton(
+                                onPressed: () => _updateDepartment(context, department),
+                                child: const Text('Update'),
+                              ),
+                              const SizedBox(width: 8),
+                              DeleteButton(
+                                text: "Delete",
+                                onPressed: () => _deleteDepartment(department),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ]);
+                    }),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         );
       },

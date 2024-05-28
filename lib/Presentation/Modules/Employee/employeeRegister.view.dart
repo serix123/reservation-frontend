@@ -34,6 +34,7 @@ class _EmployeeRegisterScreenState extends State<EmployeeRegisterScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<AuthenticationViewModel>(context, listen: false).resetMessage();
+      Provider.of<EmployeeViewModel>(context, listen: false).resetMessage();
     });
     _id = null;
     _firstName = null;
@@ -61,17 +62,14 @@ class _EmployeeRegisterScreenState extends State<EmployeeRegisterScreen> {
           immediateHead: _head,
           department: _departmentId),
     );
-    await Provider.of<AuthenticationViewModel>(context, listen: false).registerByAdmin(credentials);
-    // Employee? response = Provider.of<EmployeeViewModel>(context, listen: false).updatedEmployee;
-    // setState(() {
-    //   _id = response?.id;
-    //   _firstName = response?.firstName;
-    //   _lastName =response?.lastName;
-    //   _head = response?.immediateHead;
-    //   _departmentId = response?.department;
-    // });
-
-    // Navigator.pop(context);
+    await Provider.of<AuthenticationViewModel>(context, listen: false).registerByAdmin(credentials).then((_) async {
+      // return await Future.wait([
+      //   Provider.of<DepartmentViewModel>(context, listen: false).fetchDepartment(),
+      //   Provider.of<EmployeeViewModel>(context, listen: false).fetchProfile(),
+      //   Provider.of<EmployeeViewModel>(context, listen: false).fetchEmployees(),
+      //   Provider.of<AuthenticationViewModel>(context, listen: false).refreshAccessToken()
+      // ]);
+    });
   }
 
   void _selectDepartment(BuildContext context) {
@@ -205,8 +203,8 @@ class _EmployeeRegisterScreenState extends State<EmployeeRegisterScreen> {
   }
 
   Widget body() {
-    return Consumer2<AuthenticationViewModel,EmployeeViewModel>(
-      builder: (context,authenticationViewModel, employeeViewModel, child) {
+    return Consumer2<AuthenticationViewModel, EmployeeViewModel>(
+      builder: (context, authenticationViewModel, employeeViewModel, child) {
         if (authenticationViewModel.isLoading) {
           return const Center(child: CircularProgressIndicator());
         }

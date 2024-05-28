@@ -3,6 +3,7 @@ import 'package:online_reservation/Data/Models/event.model.dart';
 import 'package:online_reservation/Presentation/Modules/Event/event.viewmodel.dart';
 import 'package:online_reservation/Presentation/Modules/Reservation/reservation.view.dart';
 import 'package:online_reservation/Presentation/Modules/Widgets/customPurpleContainer.widget.dart';
+import 'package:online_reservation/Presentation/Modules/Widgets/message.widget.dart';
 import 'package:online_reservation/Presentation/Modules/Widgets/responsiveLayout.widget.dart';
 import 'package:online_reservation/Presentation/route/route.generator.dart';
 import 'package:online_reservation/config/app.color.dart';
@@ -32,8 +33,7 @@ class _EventListScreenState extends State<EventListScreen> {
       // Check if the widget is still mounted before calling setState.
       if (mounted) {
         setState(() {
-          lists =
-              Provider.of<EventViewModel>(context, listen: false).userEvents;
+          lists = Provider.of<EventViewModel>(context, listen: false).userEvents;
         });
       }
     } catch (error) {
@@ -57,45 +57,55 @@ class _EventListScreenState extends State<EventListScreen> {
           return const Center(child: CircularProgressIndicator());
         }
         return SingleChildScrollView(
-          child: Column(
-            children: [
-              ListView.builder(
-                shrinkWrap: true,
-                itemCount: lists!.length,
-                itemBuilder: (context, index) {
-                  final event = lists![index];
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 32.0, vertical: 12),
-                    child: CustomContainer(
-                      child: ListTile(
-                        title: Text(
-                          "${event.event_name} - ${event.status}",
-                          style: TextStyle(
-                              fontWeight: FontWeight.w700,
-                              fontSize: 16,
-                              color: Colors.deepPurple[400]),
-                        ),
-                        subtitle: Text(event.event_description ?? ""),
-                        trailing: IconButton(
-                            onPressed: () {
-                              var args = ReservationScreenArguments(slipNo: event.slip_number,type: RequestType.Update);
-                              Navigator.of(context)
-                                  .pushNamed(RouteGenerator.reservationScreen, arguments: args);
-                            },
-                            icon: const Icon(Icons.edit_note_rounded,
-                                color: kPurpleDark)),
-                        onTap: () {
-                          // Handle the tap event if necessary
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32.0),
+            child: Column(
+              children: [
+                if (eventViewModel.successMessage.isNotEmpty)
+                  SuccessMessage(
+                    message: eventViewModel.successMessage,
+                  ),
+                if (eventViewModel.errorMessage.isNotEmpty)
+                  ErrorMessage(
+                    message: eventViewModel.errorMessage,
+                  ),
+                if (lists == null || lists!.isEmpty)
+                  const Message(
+                    message: "You have no Reservation",
+                  ),
+                ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: lists!.length,
+                  itemBuilder: (context, index) {
+                    final event = lists![index];
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      child: CustomContainer(
+                        child: ListTile(
+                          title: Text(
+                            "${event.event_name} - ${event.status}",
+                            style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16, color: Colors.deepPurple[400]),
+                          ),
+                          subtitle: Text(event.event_description ?? ""),
+                          trailing: IconButton(
+                              onPressed: () {
+                                var args =
+                                    ReservationScreenArguments(slipNo: event.slip_number, type: RequestType.Update);
+                                Navigator.of(context).pushNamed(RouteGenerator.reservationScreen, arguments: args);
+                              },
+                              icon: const Icon(Icons.edit_note_rounded, color: kPurpleDark)),
+                          onTap: () {
+                            // Handle the tap event if necessary
 
-                          print('Tapped on ${event.event_name}');
-                        },
+                            print('Tapped on ${event.event_name}');
+                          },
+                        ),
                       ),
-                    ),
-                  );
-                },
-              ),
-            ],
+                    );
+                  },
+                ),
+              ],
+            ),
           ),
         );
       },
@@ -105,9 +115,6 @@ class _EventListScreenState extends State<EventListScreen> {
   @override
   Widget build(BuildContext context) {
     return ResponsiveLayout(
-        mobileBody: body(),
-        desktopBody: body(),
-        currentRoute: EventListScreen.screen_id,
-        title: "Event List");
+        mobileBody: body(), desktopBody: body(), currentRoute: EventListScreen.screen_id, title: "Event List");
   }
 }

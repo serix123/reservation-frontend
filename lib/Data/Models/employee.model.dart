@@ -6,6 +6,7 @@ class Employee {
   int id;
   String firstName;
   String lastName;
+  String? email;
   bool? isAdmin;
   int? user;
   int? immediateHead;
@@ -21,6 +22,7 @@ class Employee {
     required this.id,
     required this.firstName,
     required this.lastName,
+    this.email,
     this.isAdmin,
     this.user,
     this.immediateHead,
@@ -77,6 +79,7 @@ class Employee {
       id: json['id'],
       firstName: json['first_name']?? "",
       lastName: json['last_name']?? "",
+      email: json['email']?? "",
       isAdmin: json['is_admin'] ?? false,
       user: json['user'],
       immediateHead: json['immediate_head'],
@@ -96,9 +99,9 @@ class Employee {
 
 
   Map<String, dynamic> toJson() => {
-    'firstName': firstName,
-    'lastName': lastName,
-    'immediateHead': immediateHead,
+    'first_name': firstName,
+    'last_name': lastName,
+    'immediate_head': immediateHead,
     'department': department,
     // 'event_file': file,
   };

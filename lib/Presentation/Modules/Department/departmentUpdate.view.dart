@@ -108,6 +108,9 @@ class _DepartmentEditScreenState extends State<DepartmentEditScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<DepartmentViewModel>(context, listen: false).resetMessage();
+    });
     if (widget.department != null) {
       _id = widget.department?.id;
       _name = widget.department?.name;

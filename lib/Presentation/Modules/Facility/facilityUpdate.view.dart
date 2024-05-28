@@ -33,6 +33,7 @@ class _FacilityEditScreenState extends State<FacilityEditScreen> {
   @override
   void initState() {
     super.initState();
+    Provider.of<FacilityViewModel>(context, listen: false).resetMessage();
     if (widget.facility != null) {
       _id = widget.facility?.id;
       _name = widget.facility?.name;

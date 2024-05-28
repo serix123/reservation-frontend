@@ -11,6 +11,9 @@ class EventViewModel extends ChangeNotifier {
   String _errorMessage = '';
   String get errorMessage => _errorMessage;
 
+  String _successMessage = '';
+  String get successMessage => _successMessage;
+
   bool _isRegistered = false;
   bool get isRegistered => _isRegistered;
   List<Event> _allEvents = [];
@@ -20,6 +23,12 @@ class EventViewModel extends ChangeNotifier {
   List<Event> get userEvents => _userEvents;
   Event? _event;
   Event? get userEvent => _event;
+
+  void resetMessage() {
+    _successMessage = '';
+    _errorMessage = '';
+    notifyListeners();
+  }
 
   Future<void> fetchAllEvents() async {
     _isLoading = true;
@@ -38,6 +47,7 @@ class EventViewModel extends ChangeNotifier {
       notifyListeners();
     }
   }
+
   Future<void> fetchUserEvents() async {
     _isLoading = true;
     print('_isLoading: $_isLoading');
@@ -55,6 +65,7 @@ class EventViewModel extends ChangeNotifier {
       notifyListeners();
     }
   }
+
   Future<void> fetchEvent(String slipNo) async {
     _isLoading = true;
     _errorMessage = '';
@@ -71,78 +82,88 @@ class EventViewModel extends ChangeNotifier {
       notifyListeners();
     }
   }
-  Future<bool> cancelEvent(String slipNo) async {
+
+  Future<void> cancelEvent(String slipNo) async {
     _isLoading = true;
+    _successMessage = '';
     _errorMessage = '';
+    _isRegistered = false;
     notifyListeners();
     bool success = false;
     try {
       success = await _apiService.cancelEvent(slipNo);
-      _errorMessage = '';
-      return success;
+      if (success) {
+        _successMessage = "Event has been cancelled";
+      }
     } catch (e) {
-      _errorMessage = e.toString();
+      _errorMessage = "Event deletion has failed: ${e.toString()}";
       print(_errorMessage);
     } finally {
       _isLoading = false;
       notifyListeners();
     }
-    return success;
   }
-  Future<bool> deleteEvent(int id) async {
+
+  Future<void> deleteEvent(int id) async {
     _isLoading = true;
+    _successMessage = '';
     _errorMessage = '';
+    _isRegistered = false;
     notifyListeners();
     bool success = false;
     try {
       success = await _apiService.deleteEvent(id);
-      _errorMessage = '';
-      return success;
+      if (success) {
+        _successMessage = "Event has been deleted";
+      }
     } catch (e) {
-      _errorMessage = e.toString();
+      _errorMessage = "Event cancellation has failed: ${e.toString()}";
       print(_errorMessage);
     } finally {
       _isLoading = false;
       notifyListeners();
     }
-    return success;
   }
-  Future<bool> registerEvent(Event event) async {
+
+  Future<void> registerEvent(Event event) async {
+    _isLoading = true;
+    _successMessage = '';
     _errorMessage = '';
     _isRegistered = false;
-    _isLoading = true;
     print('_eventLoad: $_isLoading');
     notifyListeners();
     try {
       _isRegistered = await _apiService.registerEvent(event);
-      _errorMessage = '';
-      return true;
+      if (_isRegistered) {
+        _successMessage = "Event has been Registered";
+      }else{
+        _errorMessage = "Event registration has failed";
+      }
     } catch (e) {
-      _errorMessage = e.toString();
+      _errorMessage = "Event registration has failed: ${e.toString()}";
       _isRegistered = false;
-      return false;
     } finally {
       _isLoading = false;
       print('_eventLoad: $_isLoading');
-      _isRegistered = true;
       notifyListeners();
-
     }
   }
-  Future<bool> updateEvent(Event event) async {
+
+  Future<void> updateEvent(Event event) async {
+    _isLoading = true;
+    _successMessage = '';
     _errorMessage = '';
     _isRegistered = false;
-    _isLoading = true;
     print('_eventLoad: $_isLoading');
     notifyListeners();
     try {
       _isRegistered = await _apiService.updateEvent(event);
-      _errorMessage = '';
-      return _isRegistered;
+      if (_isRegistered) {
+        _successMessage = "Event has been updated";
+      }
     } catch (e) {
-      _errorMessage = e.toString();
+      _errorMessage = "Event update has failed: ${e.toString()}";
       _isRegistered = false;
-      return _isRegistered;
     } finally {
       _isLoading = false;
       print('_eventLoad: $_isLoading');

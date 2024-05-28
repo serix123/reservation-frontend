@@ -6,6 +6,7 @@ import 'package:online_reservation/Data/Models/department.model.dart';
 import 'package:online_reservation/Presentation/Modules/Department/department.viewmodel.dart';
 import 'package:online_reservation/Presentation/Modules/Event/event.viewmodel.dart';
 import 'package:online_reservation/Presentation/Modules/Event/eventList.view.dart';
+import 'package:online_reservation/Presentation/Modules/Widgets/message.widget.dart';
 import 'package:online_reservation/Utils/utils.dart';
 import 'package:online_reservation/config/app.color.dart';
 import 'package:provider/provider.dart';
@@ -42,7 +43,7 @@ class _ReservationScreenState extends State<ReservationScreen> {
   late Event event;
 
   bool stateLoaded = false;
-  String? _statusValue = 'draft';
+  late String? _statusValue;
   late TextEditingController _requesitionerController;
   late TextEditingController _departmentController;
   late TextEditingController _contactNoController;
@@ -52,8 +53,8 @@ class _ReservationScreenState extends State<ReservationScreen> {
   late TextEditingController _quantityController;
   late TextEditingController _additionalRequirementsController;
 
-  DateTime _selectedStartDate = DateTime.now();
-  DateTime _selectedEndDate = DateTime.now().add(new Duration(days: 7)); // Default end time is 1 hour later
+  DateTime _selectedStartDate = DateTime.now().add(const Duration(days: 1));
+  DateTime _selectedEndDate = DateTime.now().add(const Duration(days: 7)); // Default end time is 1 hour later
   TimeOfDay _selectedStartTime = TimeOfDay.now();
   TimeOfDay _selectedEndTime = TimeOfDay(hour: TimeOfDay.now().hour + 1, minute: TimeOfDay.now().minute);
 
@@ -175,15 +176,26 @@ class _ReservationScreenState extends State<ReservationScreen> {
   }
 
   void _pickStartEndDate() async {
+    final initialStartDate = _selectedStartDate;
+    if(_selectedStartDate.isBefore(DateTime.now().add(const Duration(days: 1)))){
+      setState(() {
+        _selectedStartDate = DateTime.now().add(const Duration(days: 1));
+      });
+    }
     final DateTime? startEndDate = await showDatePicker(
       // helpText: "Select End Date",
 
       context: context,
       initialDate: _selectedStartDate,
-      firstDate: DateTime(2015),
+      firstDate: DateTime.now().add(const Duration(days: 1)),
       lastDate: DateTime(2050),
     );
-    if (startEndDate == null) return; // User canceled the picker
+    if (startEndDate == null) {
+      setState(() {
+        _selectedStartDate = initialStartDate;
+      });
+      return; // User canceled the picker
+    }
 
     setState(() {
       _selectedStartDate = startEndDate;
@@ -216,11 +228,137 @@ class _ReservationScreenState extends State<ReservationScreen> {
     );
   }
 
+  void _showConfirmationDialog(RequestType type) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Consumer<EventViewModel>(builder: (context, eventViewModel, child) {
+          return AlertDialog(
+            title: const Text('Confirm'),
+            content: Text(
+                'Are you sure you want to ${Utils.formatEnumString(type.toString().split('.').last)} reservation?'),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () async {
+                  var cancel = event.status == 'confirmed' ? true : false;
+
+                  setState(() {
+                    event.event_name = _eventNameController.text;
+                    event.event_description = _eventDescriptionController.text;
+                    event.contact_number = _contactNoController.text;
+                    event.additional_needs = _additionalRequirementsController.text;
+                    event.reserved_facility = selectedFacility?.id;
+                    event.department = Provider.of<EmployeeViewModel>(context, listen: false).profile?.department ?? 1;
+                    event.participants_quantity = int.parse(_participantNumberController.text);
+                    event.start_time = Utils.combineDateTime(_selectedStartDate, _selectedStartTime);
+                    event.end_time = Utils.combineDateTime(_selectedEndDate, _selectedEndTime);
+                    event.equipments = addedEquipments;
+                    event.status = _statusValue;
+                    event.fileUpload = _fileBytes;
+                    event.fileName = _fileName;
+                  });
+                  bool success;
+
+                  switch (type) {
+                    case RequestType.Create:
+                      // TODO: Handle this case.
+                      // success = await eventViewModel.registerEvent(event);
+                      await eventViewModel.registerEvent(event);
+                      break;
+                    case RequestType.Update:
+                      // TODO: Handle this case.
+                      // success = await eventViewModel.updateEvent(event);
+                      await eventViewModel.updateEvent(event);
+                      break;
+                    case RequestType.Delete:
+                      // TODO: Handle this case.
+                      if (cancel) {
+                        // success = await eventViewModel.cancelEvent(event.slip_number!);
+                        await eventViewModel.cancelEvent(event.slip_number!);
+                      } else {
+                        // success = await eventViewModel.deleteEvent(event.id!);
+                        await eventViewModel.deleteEvent(event.id!);
+                      }
+                      break;
+                    case RequestType.Read:
+                      // TODO: Handle this case.
+                      success = false;
+                      break;
+                  }
+                  if (type == RequestType.Delete) {
+                    Navigator.of(context).pop();
+                    Navigator.of(context).popAndPushNamed(EventListScreen.screen_id);
+                  } else {
+                    Navigator.of(context).pop();
+                  }
+
+                  // if (mounted) {
+                  //   Navigator.of(context).popAndPushNamed(EventListScreen.screen_id);
+                  //   if (success) {
+                  //     showDialog(
+                  //       context: context,
+                  //       builder: (BuildContext context) {
+                  //         return AlertDialog(
+                  //           title: const Text('Confirmed'),
+                  //           content: const Text('Process Success!'),
+                  //           actions: <Widget>[
+                  //             TextButton(
+                  //               onPressed: () {
+                  //                 Navigator.of(context).pop(); // Close the dialog
+                  //                 // Navigator.of(context).popAndPushNamed(
+                  //                 //     EventListScreen.screen_id);
+                  //               },
+                  //               child: const Text('OK'),
+                  //             ),
+                  //           ],
+                  //         );
+                  //       },
+                  //     );
+                  //   } else {
+                  //     Navigator.of(context).pop();
+                  //     showDialog(
+                  //       context: context,
+                  //       builder: (BuildContext context) {
+                  //         return AlertDialog(
+                  //           title: const Text('Error'),
+                  //           content: const Text('Reservation failed'),
+                  //           actions: <Widget>[
+                  //             TextButton(
+                  //               onPressed: () {
+                  //                 Navigator.of(context).pop(); // Close the dialog
+                  //                 // Navigator.of(context).popAndPushNamed(
+                  //                 //     EventListScreen.screen_id);
+                  //               },
+                  //               child: const Text('OK'),
+                  //             ),
+                  //           ],
+                  //         );
+                  //       },
+                  //     );
+                  //   }
+                  // }
+                },
+                child: const Text('Yes'),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop(); // Close the dialog
+                },
+                child: const Text('No'),
+              ),
+            ],
+          );
+        });
+      },
+    );
+  }
+
   Future<void> initData() async {
     var getEventFuture = widget.args?.slipNo != null
         ? Provider.of<EventViewModel>(context, listen: false).fetchEvent(widget.args!.slipNo!)
         : Future.value(null);
     try {
+      Provider.of<EventViewModel>(context, listen: false).resetMessage();
       // Gather all asynchronous operations.
       await Future.wait([
         Provider.of<EquipmentViewModel>(context, listen: false).fetchEquipment(),
@@ -245,6 +383,7 @@ class _ReservationScreenState extends State<ReservationScreen> {
         setState(() {
           if (widget.args?.slipNo != null) {
             event = Provider.of<EventViewModel>(context, listen: false).userEvent!;
+            _statusValue = event.status;
             _contactNoController.text = event.contact_number!;
             _eventNameController.text = event.event_name!;
             _eventDescriptionController.text = event.event_description!;
@@ -283,8 +422,11 @@ class _ReservationScreenState extends State<ReservationScreen> {
                 event_name: "test",
                 start_time: Utils.combineDateTime(_selectedStartDate, _selectedStartTime),
                 end_time: Utils.combineDateTime(_selectedEndDate, _selectedEndTime));
+            _statusValue = "draft";
           }
           stateLoaded = true;
+          enabled =
+          widget.args?.type == RequestType.Read ? false : true;
         });
       }
     } catch (error) {
@@ -309,13 +451,11 @@ class _ReservationScreenState extends State<ReservationScreen> {
       initData();
     });
     Future.microtask(() async => _fileBytes = await Utils.downloadFile(event.file!));
-    enabled =
-        // widget.args?.slipNo != null &&
-        widget.args?.type == RequestType.Read ? false : true;
   }
 
   @override
   void dispose() {
+    // Provider.of<EventViewModel>(context, listen: false).resetMessage();
     _requesitionerController.dispose();
     _departmentController.dispose();
     _contactNoController.dispose();
@@ -345,6 +485,14 @@ class _ReservationScreenState extends State<ReservationScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  if (eventViewModel.successMessage.isNotEmpty)
+                    SuccessMessage(
+                      message: eventViewModel.successMessage,
+                    ),
+                  if (eventViewModel.errorMessage.isNotEmpty)
+                    ErrorMessage(
+                      message: eventViewModel.errorMessage,
+                    ),
                   Text("Requesitioner Details", style: Theme.of(context).textTheme.titleLarge),
                   Row(
                     children: [
@@ -420,7 +568,16 @@ class _ReservationScreenState extends State<ReservationScreen> {
                                 });
                               }
                             : null,
-                        items: <String>['draft', 'application'].map<DropdownMenuItem<String>>((String value) {
+                        items: <String>[
+                          'draft',
+                          'application',
+                          if (widget.args?.type == RequestType.Update || widget.args?.type == RequestType.Read)
+                            'cancelled',
+                          if (widget.args?.type == RequestType.Update || widget.args?.type == RequestType.Read)
+                            'returned',
+                          if (widget.args?.type == RequestType.Update || widget.args?.type == RequestType.Read)
+                            'confirmed'
+                        ].map<DropdownMenuItem<String>>((String value) {
                           return DropdownMenuItem<String>(
                             value: value,
                             child: Text(
@@ -554,6 +711,7 @@ class _ReservationScreenState extends State<ReservationScreen> {
                   //       child: ListTile(
                   //         enabled: enabled,
                   //         title: const Text("Select End Time"),
+                  //         subtitle: Text(_selectedEndTime.format(context)),
                   //         subtitle: Text(_selectedEndTime.format(context)),
                   //         onTap: _pickEndTime,
                   //       ),
@@ -766,7 +924,7 @@ class _ReservationScreenState extends State<ReservationScreen> {
                             ),
                             child: Text(
                               "${event.status == 'confirmed' ? 'Cancel' : 'Delete'} Reservation",
-                              style: TextStyle(color: kBackgroundGrey),
+                              style: const TextStyle(color: kBackgroundGrey),
                             ),
                           ),
                         ],
@@ -788,121 +946,6 @@ class _ReservationScreenState extends State<ReservationScreen> {
           )
       ]);
     });
-  }
-
-  void _showConfirmationDialog(RequestType type) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return Consumer<EventViewModel>(builder: (context, eventViewModel, child) {
-          return AlertDialog(
-            title: const Text('Confirm'),
-            content: Text(
-                'Are you sure you want to ${Utils.formatEnumString(type.toString().split('.').last)} reservation?'),
-            actions: <Widget>[
-              TextButton(
-                onPressed: () async {
-                  var cancel = event.status == 'confirmed' ? true : false;
-
-                  setState(() {
-                    event.event_name = _eventNameController.text;
-                    event.event_description = _eventDescriptionController.text;
-                    event.contact_number = _contactNoController.text;
-                    event.additional_needs = _additionalRequirementsController.text;
-                    event.reserved_facility = selectedFacility?.id;
-                    event.department = Provider.of<EmployeeViewModel>(context, listen: false).profile?.department ?? 1;
-                    event.participants_quantity = int.parse(_participantNumberController.text);
-                    event.start_time = Utils.combineDateTime(_selectedStartDate, _selectedStartTime);
-                    event.end_time = Utils.combineDateTime(_selectedEndDate, _selectedEndTime);
-                    event.equipments = addedEquipments;
-                    event.status = _statusValue;
-                    event.fileUpload = _fileBytes;
-                    event.fileName = _fileName;
-                  });
-                  bool success;
-
-                  switch (type) {
-                    case RequestType.Create:
-                      // TODO: Handle this case.
-                      success = await eventViewModel.registerEvent(event);
-                      break;
-                    case RequestType.Update:
-                      // TODO: Handle this case.
-                      success = await eventViewModel.updateEvent(event);
-                      break;
-                    case RequestType.Delete:
-                      // TODO: Handle this case.
-                      if (cancel) {
-                        success = await eventViewModel.cancelEvent(event.slip_number!);
-                      } else {
-                        success = await eventViewModel.deleteEvent(event.id!);
-                      }
-                      break;
-                    case RequestType.Read:
-                      // TODO: Handle this case.
-                      success = false;
-                      break;
-                  }
-
-                  if (mounted) {
-                    Navigator.of(context).popAndPushNamed(EventListScreen.screen_id);
-                    if (success) {
-                      showDialog(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return AlertDialog(
-                            title: const Text('Confirmed'),
-                            content: const Text('Process Success!'),
-                            actions: <Widget>[
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.of(context).pop(); // Close the dialog
-                                  // Navigator.of(context).popAndPushNamed(
-                                  //     EventListScreen.screen_id);
-                                },
-                                child: const Text('OK'),
-                              ),
-                            ],
-                          );
-                        },
-                      );
-                    } else {
-                      Navigator.of(context).pop();
-                      showDialog(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return AlertDialog(
-                            title: const Text('Error'),
-                            content: const Text('Reservation failed'),
-                            actions: <Widget>[
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.of(context).pop(); // Close the dialog
-                                  // Navigator.of(context).popAndPushNamed(
-                                  //     EventListScreen.screen_id);
-                                },
-                                child: const Text('OK'),
-                              ),
-                            ],
-                          );
-                        },
-                      );
-                    }
-                  }
-                },
-                child: const Text('Yes'),
-              ),
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop(); // Close the dialog
-                },
-                child: const Text('No'),
-              ),
-            ],
-          );
-        });
-      },
-    );
   }
 
   @override

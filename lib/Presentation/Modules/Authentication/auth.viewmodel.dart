@@ -1,10 +1,8 @@
-
 import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:online_reservation/Data/API_Services/auth.service.dart';
 import 'package:online_reservation/Data/Models/auth.model.dart';
-
 
 class AuthenticationViewModel extends ChangeNotifier {
   final AuthService _authService = AuthService();
@@ -22,6 +20,7 @@ class AuthenticationViewModel extends ChangeNotifier {
     _timer?.cancel();
     super.dispose();
   }
+
   bool _isLoggedIn = false;
   bool get isLoggedIn => _isLoggedIn;
 
@@ -31,11 +30,8 @@ class AuthenticationViewModel extends ChangeNotifier {
   String _errorMessage = '';
   String get errorMessage => _errorMessage;
 
-
   String _successMessage = '';
   String get successMessage => _successMessage;
-
-
 
   AuthenticationViewModel() {
     init();
@@ -61,9 +57,11 @@ class AuthenticationViewModel extends ChangeNotifier {
   void resetMessage() {
     _successMessage = '';
     _errorMessage = '';
+    notifyListeners();
   }
+
   Future<void> login(String email, String password) async {
-    UserCredentials credentials = UserCredentials(email: email,password: password);
+    UserCredentials credentials = UserCredentials(email: email, password: password);
     bool loggedIn = await _authService.login(credentials);
     if (loggedIn) {
       _isLoggedIn = true;
@@ -75,11 +73,11 @@ class AuthenticationViewModel extends ChangeNotifier {
 
   Future<bool> register(String firstName, String lastName, String email, String password) async {
     RegistrationCredentials credentials = RegistrationCredentials(
-        first_name: firstName,
-        last_name: lastName,
-        email: email,
-        password: password,
-        password2: password,
+      first_name: firstName,
+      last_name: lastName,
+      email: email,
+      password: password,
+      password2: password,
     );
     try {
       bool registered = await _authService.register(credentials);
@@ -113,7 +111,7 @@ class AuthenticationViewModel extends ChangeNotifier {
     } catch (e) {
       _errorMessage = "Registration error: $e";
       print(_errorMessage);
-    }finally{
+    } finally {
       _isLoading = false;
       notifyListeners();
     }
@@ -135,18 +133,44 @@ class AuthenticationViewModel extends ChangeNotifier {
           _errorMessage = "Registration Fail";
           notifyListeners();
         }
-        if(_errorMessage.isNotEmpty){
+        if (_errorMessage.isNotEmpty) {
           throw Exception("failed to register ${userData.email}");
         }
       }
     } catch (e) {
       _errorMessage = "Registration error: $e";
       print(_errorMessage);
-    }finally{
+    } finally {
       _isLoading = false;
       notifyListeners();
     }
     return false;
+  }
+
+  Future<void> updateByAdmin(UserUpdateDetails updateDetails) async {
+    _isLoading = true;
+    _successMessage = '';
+    _errorMessage = '';
+    notifyListeners();
+    try {
+      bool registered = await _authService.update(updateDetails);
+      if (registered) {
+        _successMessage = "Update Success";
+        notifyListeners();
+      } else {
+        _errorMessage = "Update Fail";
+        notifyListeners();
+      }
+      if (_errorMessage.isNotEmpty) {
+        throw Exception(_errorMessage);
+      }
+    } catch (e) {
+      _errorMessage = "Registration error: $e";
+      print(_errorMessage);
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 
   Future<void> refreshAccessToken() async {

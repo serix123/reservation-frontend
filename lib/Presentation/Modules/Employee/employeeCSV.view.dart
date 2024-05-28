@@ -23,6 +23,14 @@ class _EmployeeCSVImportScreenState extends State<EmployeeCSVImportScreen> {
   List<List<dynamic>> data = [];
   List<RegistrationCredentials> list = [];
 
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<AuthenticationViewModel>(context, listen: false).resetMessage();
+    });
+  }
+
   Future<void> _uploadCSV() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
@@ -38,6 +46,7 @@ class _EmployeeCSVImportScreenState extends State<EmployeeCSVImportScreen> {
 
         // Handling null values and parsing specific columns to int
         for (int i = 0; i < csvTable.length; i++) {
+          if (i == 0) continue;
           for (int j = 0; j < csvTable[i].length; j++) {
             if (csvTable[i][j] == null) {
               csvTable[i][j] = '';
@@ -49,7 +58,7 @@ class _EmployeeCSVImportScreenState extends State<EmployeeCSVImportScreen> {
 
         setState(() {
           data = csvTable;
-          for (var item in data){
+          for (var item in data) {
             final credentials = RegistrationCredentials(
               first_name: item[0].toString() ?? "",
               last_name: item[1].toString() ?? "",
@@ -84,7 +93,7 @@ class _EmployeeCSVImportScreenState extends State<EmployeeCSVImportScreen> {
   }
 
   Widget body() {
-    return Consumer2<AuthenticationViewModel,EmployeeViewModel>(
+    return Consumer2<AuthenticationViewModel, EmployeeViewModel>(
       builder: (context, authenticationViewModel, employeeViewModel, child) {
         if (authenticationViewModel.isLoading) {
           return const Center(child: CircularProgressIndicator());
@@ -112,7 +121,7 @@ class _EmployeeCSVImportScreenState extends State<EmployeeCSVImportScreen> {
                     ),
                     const SizedBox(width: 8),
                     ElevatedButton(
-                      onPressed: data.isNotEmpty ? _saveEmployee:null,
+                      onPressed: data.isNotEmpty ? _saveEmployee : null,
                       child: Text('Register'),
                     ),
                   ],

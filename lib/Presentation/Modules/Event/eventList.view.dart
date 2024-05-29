@@ -75,6 +75,7 @@ class _EventListScreenState extends State<EventListScreen> {
                   ),
                 ListView.builder(
                   shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
                   itemCount: lists!.length,
                   itemBuilder: (context, index) {
                     final event = lists![index];

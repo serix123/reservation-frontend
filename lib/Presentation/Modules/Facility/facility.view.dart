@@ -23,7 +23,7 @@ class _FacilityScreenState extends State<FacilityScreen> {
   Future<void> fetchDataFromAPI() async {
     try {
       // Gather all asynchronous operations.
-      Provider.of<AuthenticationViewModel>(context, listen: false).resetMessage();
+      Provider.of<FacilityViewModel>(context, listen: false).resetMessage();
       await Future.wait([
         Provider.of<DepartmentViewModel>(context, listen: false).fetchDepartment(),
         Provider.of<EmployeeViewModel>(context, listen: false).fetchProfile(),

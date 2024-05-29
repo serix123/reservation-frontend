@@ -177,7 +177,7 @@ class _ReservationScreenState extends State<ReservationScreen> {
 
   void _pickStartEndDate() async {
     final initialStartDate = _selectedStartDate;
-    if(_selectedStartDate.isBefore(DateTime.now().add(const Duration(days: 1)))){
+    if (_selectedStartDate.isBefore(DateTime.now().add(const Duration(days: 1)))) {
       setState(() {
         _selectedStartDate = DateTime.now().add(const Duration(days: 1));
       });
@@ -353,6 +353,13 @@ class _ReservationScreenState extends State<ReservationScreen> {
     );
   }
 
+  bool _isDisabled(String status) {
+    if (event.status == 'confirmed' || event.status == 'cancelled' || event.status == 'returned') {
+      return status == 'confirmed' || status == 'cancelled' || status == 'returned';
+    }
+    return false;
+  }
+
   Future<void> initData() async {
     var getEventFuture = widget.args?.slipNo != null
         ? Provider.of<EventViewModel>(context, listen: false).fetchEvent(widget.args!.slipNo!)
@@ -425,8 +432,7 @@ class _ReservationScreenState extends State<ReservationScreen> {
             _statusValue = "draft";
           }
           stateLoaded = true;
-          enabled =
-          widget.args?.type == RequestType.Read ? false : true;
+          enabled = widget.args?.type == RequestType.Read ? false : true;
         });
       }
     } catch (error) {
@@ -562,6 +568,7 @@ class _ReservationScreenState extends State<ReservationScreen> {
                           child: DropdownButton<String>(
                         value: _statusValue,
                         onChanged: enabled
+                            // && event.status != 'confirmed'
                             ? (String? newValue) {
                                 setState(() {
                                   _statusValue = newValue;
@@ -571,14 +578,19 @@ class _ReservationScreenState extends State<ReservationScreen> {
                         items: <String>[
                           'draft',
                           'application',
-                          if (widget.args?.type == RequestType.Update || widget.args?.type == RequestType.Read)
-                            'cancelled',
-                          if (widget.args?.type == RequestType.Update || widget.args?.type == RequestType.Read)
+                          if (widget.args != null)
+                            if (event.status == 'cancelled' &&
+                                (widget.args?.type == RequestType.Update || widget.args?.type == RequestType.Read))
+                              'cancelled',
+                          if (event.status == 'returned' &&
+                              (widget.args?.type == RequestType.Update || widget.args?.type == RequestType.Read))
                             'returned',
-                          if (widget.args?.type == RequestType.Update || widget.args?.type == RequestType.Read)
+                          if (event.status == 'confirmed' &&
+                              (widget.args?.type == RequestType.Update || widget.args?.type == RequestType.Read))
                             'confirmed'
                         ].map<DropdownMenuItem<String>>((String value) {
                           return DropdownMenuItem<String>(
+                            enabled:!_isDisabled(value),
                             value: value,
                             child: Text(
                               value,

@@ -158,6 +158,7 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
               else
                 ListView(
                   shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
                   children: lists?.map((item) {
                         if (approvalViewModel.isLoading || employeeViewModel.isLoading || !stateLoaded) {
                           return const Center(child: CircularProgressIndicator());

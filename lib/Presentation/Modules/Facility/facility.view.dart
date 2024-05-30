@@ -19,7 +19,6 @@ class FacilityScreen extends StatefulWidget {
 }
 
 class _FacilityScreenState extends State<FacilityScreen> {
-
   Future<void> fetchDataFromAPI() async {
     try {
       // Gather all asynchronous operations.
@@ -75,7 +74,7 @@ class _FacilityScreenState extends State<FacilityScreen> {
               child: const Text('Cancel'),
             ),
             TextButton(
-              onPressed: () async{
+              onPressed: () async {
                 await Provider.of<FacilityViewModel>(context, listen: false).deleteFacility(facility);
                 setState(() {});
                 await Provider.of<FacilityViewModel>(context, listen: false).fetchFacilities();
@@ -101,8 +100,6 @@ class _FacilityScreenState extends State<FacilityScreen> {
       });
     });
   }
-
-
 
   @override
   Widget build(BuildContext context) {

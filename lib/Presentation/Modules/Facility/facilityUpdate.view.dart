@@ -1,9 +1,6 @@
-import 'dart:typed_data';
-
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:online_reservation/Data/Models/department.model.dart';
 import 'package:online_reservation/Data/Models/facility.model.dart';
 import 'package:online_reservation/Presentation/Modules/Department/department.viewmodel.dart';
 import 'package:online_reservation/Presentation/Modules/Facility/facilityList.viewmodel.dart';
@@ -95,7 +92,6 @@ class _FacilityEditScreenState extends State<FacilityEditScreen> {
       _head = response?.person_in_charge;
       _departmentId = response?.department;
       _fileName = response?.image?.split('/').last;
-
     });
   }
 

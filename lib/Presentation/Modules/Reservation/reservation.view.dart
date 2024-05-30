@@ -1,9 +1,7 @@
-import 'dart:typed_data';
 import 'package:collection/collection.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:online_reservation/Data/Models/department.model.dart';
 import 'package:online_reservation/Presentation/Modules/Department/department.viewmodel.dart';
 import 'package:online_reservation/Presentation/Modules/Event/event.viewmodel.dart';
 import 'package:online_reservation/Presentation/Modules/Event/eventList.view.dart';
@@ -262,7 +260,6 @@ class _ReservationScreenState extends State<ReservationScreen> {
                     event.fileUpload = _fileBytes;
                     event.fileName = _fileName;
                   });
-                  bool success;
 
                   switch (type) {
                     case RequestType.Create:
@@ -287,7 +284,6 @@ class _ReservationScreenState extends State<ReservationScreen> {
                       break;
                     case RequestType.Read:
                       // TODO: Handle this case.
-                      success = false;
                       break;
                   }
                   if (type == RequestType.Delete) {

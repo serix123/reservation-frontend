@@ -280,7 +280,7 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
             actions: <Widget>[
               TextButton(
                 onPressed: () async {
-                  Navigator.of(context).pop(); // Close the dialog
+                  // Navigator.of(context).pop(); // Close the dialog
                   if (approved) {
                     switch (_listValue) {
                       case null:

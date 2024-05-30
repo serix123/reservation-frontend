@@ -84,7 +84,8 @@ class FacilityViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      _facility = await _apiService.createFacility(facility);
+      // _facility = await _apiService.createFacility(facility);
+      _facility = await _apiService.registerFacility(facility);
       _successMessage = "Facility has been created";
       if (_facility == null) {
         _successMessage = '';

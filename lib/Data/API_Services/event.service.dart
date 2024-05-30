@@ -1,6 +1,9 @@
 // ignore_for_file: unused_import
 
 import 'dart:convert';
+import 'dart:io';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart' as http_parser;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -141,17 +144,26 @@ class EventAPIService {
       var request = http.MultipartRequest('POST', uri);
       request.headers['Authorization'] = 'Bearer $token';
       request.fields['data'] = jsonEncode(event.toJson());
-      if (event.fileUpload != null) {
+      if (event.fileUpload != null || event.filePath != null) {
         // Determine the content type based on the file extension
         MediaType contentType = Utils.determineMediaType(event.fileName!);
-        // Add file part
-        request.files.add(http.MultipartFile.fromBytes(
-          'event_file',
-          event.fileUpload!,
-          filename: event.fileName!,
-          // contentType: http_parser.MediaType('image', 'jpeg'), // Adjust the content type accordingly
-          contentType: contentType, // Adjust the content type accordingly
-        ));
+
+        if (kIsWeb) {
+          request.files.add(http.MultipartFile.fromBytes(
+            'event_file',
+            event.fileUpload!,
+            filename: event.fileName!,
+            contentType: contentType,
+          ));
+        } else {
+          // File file = File(event.filePath!);
+          request.files.add(await http.MultipartFile.fromPath(
+            'event_file',
+            event.filePath!,
+            filename: event.fileName!,
+            contentType: contentType,
+          ));
+        }
       }
 
       final response = await request.send();
@@ -185,21 +197,31 @@ class EventAPIService {
       var request = http.MultipartRequest('PATCH', uri);
       request.headers['Authorization'] = 'Bearer $token';
       request.fields['data'] = jsonEncode(event.toJson());
-      if (event.fileUpload != null) {
+      if (event.fileUpload != null || event.filePath != null) {
         // Determine the content type based on the file extension
         MediaType contentType = Utils.determineMediaType(event.fileName!);
-        // Add file part
-        request.files.add(http.MultipartFile.fromBytes(
-          'event_file',
-          event.fileUpload!,
-          filename: event.fileName!,
-          // contentType: http_parser.MediaType('image', 'jpeg'), // Adjust the content type accordingly
-          contentType: contentType, // Adjust the content type accordingly
-        ));
+        if (kIsWeb) {
+          request.files.add(http.MultipartFile.fromBytes(
+            'event_file',
+            event.fileUpload!,
+            filename: event.fileName!,
+            contentType: contentType,
+          ));
+        } else {
+          // File file = File(event.filePath!);
+          // print(file.path);
+          // print(event.filePath!);
+          request.files.add(await http.MultipartFile.fromPath(
+            'event_file',
+            event.filePath!,
+            filename: event.fileName!,
+            contentType: contentType,
+          ));
+        }
       }
 
       // print(request);
-      print(request.fields['data']);
+      print(request.fields);
       final response = await request.send();
       if (response.statusCode == 200) {
         print("Data and image uploaded successfully.");

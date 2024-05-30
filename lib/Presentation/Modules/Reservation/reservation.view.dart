@@ -1,8 +1,7 @@
-import 'dart:typed_data';
 import 'package:collection/collection.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:online_reservation/Data/Models/department.model.dart';
 import 'package:online_reservation/Presentation/Modules/Department/department.viewmodel.dart';
 import 'package:online_reservation/Presentation/Modules/Event/event.viewmodel.dart';
 import 'package:online_reservation/Presentation/Modules/Event/eventList.view.dart';
@@ -64,6 +63,7 @@ class _ReservationScreenState extends State<ReservationScreen> {
 
   Uint8List? _fileBytes;
   String? _fileName;
+  String? _filePath;
   Future<void> _pickFile() async {
     try {
       FilePickerResult? result = await FilePicker.platform.pickFiles(
@@ -76,17 +76,20 @@ class _ReservationScreenState extends State<ReservationScreen> {
         // You can use fileBytes directly or write it to the web filesystem if needed
         // Example: Upload file bytes to a server or use them locally
         setState(() {
-          _fileBytes = file.bytes; // Store file bytes directly
           _fileName = file.name;
-          event.fileUpload = _fileBytes;
+          // For demonstration purposes: print file details
+          if (kIsWeb) {
+            _fileBytes = file.bytes;
+            event.fileUpload = _fileBytes;
+            print('File Name: $_fileName');
+            print('File Bytes: $_fileBytes');
+          } else {
+            _filePath = file.path;
+            event.filePath = _filePath;
+            print('File Name: $_fileName');
+            print('File Path: $_filePath');
+          }
         });
-        // if (kIsWeb) {
-        //   // Use bytes directly for web
-        // } else {
-        //   // Use path for mobile or desktop
-        //   String? filePath = file.path;
-        //   // Use filePath to read file or perform other file operations
-        // }
       }
     } catch (e) {
       // Handle any errors here
@@ -257,7 +260,6 @@ class _ReservationScreenState extends State<ReservationScreen> {
                     event.fileUpload = _fileBytes;
                     event.fileName = _fileName;
                   });
-                  bool success;
 
                   switch (type) {
                     case RequestType.Create:
@@ -282,11 +284,10 @@ class _ReservationScreenState extends State<ReservationScreen> {
                       break;
                     case RequestType.Read:
                       // TODO: Handle this case.
-                      success = false;
                       break;
                   }
                   if (type == RequestType.Delete) {
-                    Navigator.of(context).pop();
+                    // Navigator.of(context).pop();
                     Navigator.of(context).popAndPushNamed(EventListScreen.screen_id);
                   } else {
                     Navigator.of(context).pop();
@@ -456,7 +457,9 @@ class _ReservationScreenState extends State<ReservationScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       initData();
     });
-    Future.microtask(() async => _fileBytes = await Utils.downloadFile(event.file!));
+    if(event.file != null) {
+      Future.microtask(() async => _fileBytes = await Utils.downloadFile(event.file!));
+    }
   }
 
   @override

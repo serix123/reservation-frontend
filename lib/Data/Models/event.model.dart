@@ -19,6 +19,7 @@ class Event {
   String? file;
   Uint8List? fileUpload;
   String? fileName;
+  String? filePath;
 
   Event({
     this.id,

@@ -94,9 +94,11 @@ class EventViewModel extends ChangeNotifier {
       success = await _apiService.cancelEvent(slipNo);
       if (success) {
         _successMessage = "Event has been cancelled";
+      }else{
+        _errorMessage = "Event cancellation has failed";
       }
     } catch (e) {
-      _errorMessage = "Event deletion has failed: ${e.toString()}";
+      _errorMessage = "Event cancellation has failed: ${e.toString()}";
       print(_errorMessage);
     } finally {
       _isLoading = false;
@@ -115,9 +117,11 @@ class EventViewModel extends ChangeNotifier {
       success = await _apiService.deleteEvent(id);
       if (success) {
         _successMessage = "Event has been deleted";
+      }else{
+        _errorMessage = "Event delete has failed";
       }
     } catch (e) {
-      _errorMessage = "Event cancellation has failed: ${e.toString()}";
+      _errorMessage = "Event delete has failed: ${e.toString()}";
       print(_errorMessage);
     } finally {
       _isLoading = false;
@@ -160,6 +164,8 @@ class EventViewModel extends ChangeNotifier {
       _isRegistered = await _apiService.updateEvent(event);
       if (_isRegistered) {
         _successMessage = "Event has been updated";
+      }else{
+        _errorMessage = "Event registration has failed";
       }
     } catch (e) {
       _errorMessage = "Event update has failed: ${e.toString()}";

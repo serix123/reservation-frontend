@@ -19,6 +19,16 @@ class EventListScreen extends StatefulWidget {
 
 class _EventListScreenState extends State<EventListScreen> {
   List<Event>? lists;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<EventViewModel>(context, listen: false).resetMessage();
+      fetchDataFromAPI();
+    });
+  }
+
   Future<void> fetchDataFromAPI() async {
     try {
       // Gather all asynchronous operations.
@@ -42,12 +52,13 @@ class _EventListScreenState extends State<EventListScreen> {
     }
   }
 
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      fetchDataFromAPI();
-    });
+  void _updateEvent(String? slipNo, RequestType type) {
+    var args = ReservationScreenArguments(slipNo: slipNo!, type: type);
+    Navigator.of(context)
+        .pushNamed(RouteGenerator.reservationScreen, arguments: args)
+        .then((_) => WidgetsBinding.instance.addPostFrameCallback((_) {
+              fetchDataFromAPI();
+            }));
   }
 
   Widget body() {
@@ -89,11 +100,7 @@ class _EventListScreenState extends State<EventListScreen> {
                           ),
                           subtitle: Text(event.event_description ?? ""),
                           trailing: IconButton(
-                              onPressed: () {
-                                var args =
-                                    ReservationScreenArguments(slipNo: event.slip_number, type: RequestType.Update);
-                                Navigator.of(context).pushNamed(RouteGenerator.reservationScreen, arguments: args);
-                              },
+                              onPressed: () => _updateEvent(event.slip_number, RequestType.Update),
                               icon: const Icon(Icons.edit_note_rounded, color: kPurpleDark)),
                           onTap: () {
                             // Handle the tap event if necessary

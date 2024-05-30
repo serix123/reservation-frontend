@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:online_reservation/Data/Models/event.model.dart';
 
 class Facility {
@@ -8,6 +10,9 @@ class Facility {
   List<Event>? events;
   String? image;
   String? facility_description;
+  Uint8List? fileUpload;
+  String? fileName;
+  String? filePath;
 
   Facility({
     required this.id,
